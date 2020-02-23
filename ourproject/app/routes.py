@@ -1,16 +1,26 @@
 from flask import Flask, render_template, request
 from app import app
+import csv
 
 input = ""
 
 # takes in .csv file
 def getInput():
     if request.method == 'GET':
-        place = request.args.get('place', None)
-        if place:
-            # this allows us to modify global variable
-            global input
-            input = place
+        # Create variable for uploaded file
+        #placesCSV = request.args.get('placesCSV', None)
+        #placesCSV = request.files['placesCSV']
+        print(placesCSV)
+        places = placesCSV.read()
+        print(places)
+        #place = request.args.get('placesCSV', None)
+        with open(places, newline='') as csvfile:
+            spamreader = csv.reader(csvfile, delimiter=' ', quotechar='|')
+            print(spamreader[0])
+        #if place:
+        #    # this allows us to modify global variable
+        #    global input
+        #    input = place
 
 # return routes
 def routes():
@@ -39,7 +49,21 @@ def errors():
 def index():
     return render_template("index.html", routes=routes(), map=mapArea(), errors=errors())
 
-@app.route('/findRoutes')
+@app.route('/findRoutes', methods = ['GET'])
 def findRoutes():
-    getInput()
+    print(request.method)
+    print(request.args)
+    print(request.form)
+    print(request.data)
+    if request.method == 'GET':
+        #placesCSV = request.args.get('placesCSV', None)
+        print(request.files)
+        placesCSV = request.files["placesCSV"]
+        print(placesCSV)
+        places = placesCSV.read()
+        print(places)
+        with open(places, newline='') as csvfile:
+            spamreader = csv.reader(csvfile, delimiter=' ', quotechar='|')
+            print(spamreader[0])
+    #getInput()
     return render_template("index.html", routes=routes(), map=mapArea(), errors=errors())
