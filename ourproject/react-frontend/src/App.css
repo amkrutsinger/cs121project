@@ -14,18 +14,28 @@
 }
 
 .App-header {
-  background-color: #282c34;
+  background-color: powderblue;
   min-height: 100vh;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
   font-size: calc(10px + 2vmin);
   color: white;
+  padding: 10px;
 }
 
-.App-link {
-  color: #61dafb;
+.App-map {
+  background-color: burlywood;
+  color: gray;
+  float: left;
+  width: 50vw;
+  height: 50vw;
+}
+
+.App-rightSide {
+  color: blue;
+  float: left;
+  width: 50%;
 }
 
 @keyframes App-logo-spin {
