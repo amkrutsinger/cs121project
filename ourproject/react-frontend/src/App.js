@@ -1,5 +1,4 @@
 import React from 'react';
-import logo from './logo.svg';
 import './App.css';
 
 function App() {
@@ -9,9 +8,9 @@ function App() {
         <div className="App-map">Map</div>
         <div className="App-rightSide">
           <div>Choose a CSV:</div>
-          <form action="/findRoutes" method="get">
+          <form action="/findRoutes" method="post">
             <input type="file" id="placesCSV" name="placesCSV"></input>
-            <input type="submit" />
+            <input type="submit"/>
           </form>
         </div>
       </header>
