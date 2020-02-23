@@ -8,7 +8,7 @@ function App() {
       <header className="App-header">
         <div className="App-map">Map</div>
         <div className="App-rightSide">
-          Choose a CSV
+          <div>Choose a CSV:</div>
           <input type="file" id="avatar" name="avatar" accept=".csv">
           </input>
         </div>
