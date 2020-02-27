@@ -1,21 +1,21 @@
 from flask import Flask, render_template, request
 from app import app
-import csv
+import csv, io
 import requests
 
-input = []
-
-# takes in .csv file
+# Input: .csv file (passed through request)
+# Output: list of items in .csv file
 def getInput():
-    if request.method == 'GET':
-        # once debug is figured out below move code here and replace this line
-        places = ''
-        with open(places, newline='') as csvfile:
-            locationsReader = csv.reader(csvfile, delimiter=' ', quotechar='|')
-            for location in locationsReader:
-                # this allows us to modify global variable
-                global input
-                input = location
+    # open .csv file
+    placesFile = request.files['file']
+    stream = io.StringIO(placesFile.stream.read().decode("UTF8"), newline=None)
+    places_csv = csv.reader(stream)
+
+    # Convert .csv file first to list of lists and then just list
+    placesListOfLists = list(places_csv)
+    placesList = [elt for lst in placesListOfLists for elt in lst]
+    print(placesList)
+    return placesList
 
 # return a matrix of distances given an input of coordinates
 # the output is a square matrix formatted as an array of a arrays
@@ -32,55 +32,39 @@ def distMatrix(body):
 
 # return routes
 def routes():
-    if input != "":
-        return input + " route"
-    else:
-        return ""
+    return "routes"
+    # if input != "":
+    #     return input + " route"
+    # else:
+    #     return ""
 
 # return map of area
 def mapArea():
-    if input != "":
-        return input + " map"
-    else:
-        return ""
+    return "map"
+    # if input != "":
+    #     return input + " map"
+    # else:
+    #     return ""
 
 # return errors
 def errors():
-    if input != "":
-        return input + " errors"
-    else:
-        return ""
+    return "errors"
+    # if input != "":
+    #     return input + " errors"
+    # else:
+    #     return ""
 
-# Set up the homepage with the routes, map, and errors
-# This will be set to null initialize and change when input is given
+# Set up the homepage
 @app.route('/')
 @app.route('/index')
 def index():
     return render_template("index.html", routes=routes(), map=mapArea(), errors=errors())
 
+# Parse user input and return result
 @app.route('/findRoutes', methods = ['POST'])
 def findRoutes():
-    # this code will go in getInput() it is here for debugging purposes
-    # BUG: currently request.files is empty unclear why
-    # posted to stack overflow, and awaiting response
     if request.method == 'POST':
-        # print statements for debugging
-        # working. gives 'POST'
-        print(request.method)
-        # working. gives file name
-        print(request.args)
-        # not working. Empty
-        print(request.form)
-        # not working. Empty
-        print(request.files)
-        # code should open and read csv once upload is working
-        placesCSV = request.files["placesCSV"]
-        places = placesCSV.read()
-        with open(places, newline='') as csvfile:
-            spamreader = csv.reader(csvfile, delimiter=' ', quotechar='|')
-            # print first entry in csv so we know when it works
-            print(spamreader[0])
-    body = {"locations":[[9.70093,48.477473],[9.207916,49.153868],[37.573242,55.801281],[115.663757,38.106467]]}
-    distMatrix(body)
-    #getInput()
+        getInput()
+        body = {"locations":[[9.70093,48.477473],[9.207916,49.153868],[37.573242,55.801281],[115.663757,38.106467]]}
+        distMatrix(body)
     return render_template("index.html", routes=routes(), map=mapArea(), errors=errors())
