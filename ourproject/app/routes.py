@@ -4,7 +4,8 @@ import csv, io, requests, json
 
 # --- ROUTES --- #
 
-# Set up the homepage
+# Set up the homepage with the routes, map, and errors
+# This will be set to null initialize and change when input is given
 @app.route('/')
 @app.route('/index')
 def index():
@@ -55,7 +56,7 @@ def findShortestPath(distances):
 
 # --- OPEN ROUTE SERVICE FUNCTIONS --- #
 
-    # Authorization key and other information to allow request for matrix data to process
+# Authorization key and other information to allow request for matrix data to process
 headers = {
 'Accept': 'application/json, application/geo+json, application/gpx+xml, img/png; charset=utf-8',
 'Authorization': '5b3ce3597851110001cf6248093639b34bd24267af2380b1d72d66d6',
