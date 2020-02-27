@@ -14,7 +14,6 @@ def getInput():
     # Convert .csv file first to list of lists and then just list
     placesListOfLists = list(places_csv)
     placesList = [elt for lst in placesListOfLists for elt in lst]
-    print(placesList)
     return placesList
 
 # return a matrix of distances given an input of coordinates
@@ -64,7 +63,7 @@ def index():
 @app.route('/findRoutes', methods = ['POST'])
 def findRoutes():
     if request.method == 'POST':
-        getInput()
+        placesList = getInput()
         body = {"locations":[[9.70093,48.477473],[9.207916,49.153868],[37.573242,55.801281],[115.663757,38.106467]]}
         distMatrix(body)
     return render_template("index.html", routes=routes(), map=mapArea(), errors=errors())
