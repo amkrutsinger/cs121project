@@ -18,6 +18,11 @@ def findRoutes():
         placesList = getInput()
         distances, errors = parseInput(placesList)
 
+        # algorithm assumes starting at first location
+        # BUG: currently returns a path but not the shortest-path 
+        path = dijsktra(distances, placesList)
+        print(path)
+
         # For Testing
         print (', '.join(errors))
     return render_template("index.html")
@@ -49,8 +54,47 @@ def parseInput(placesList):
 # Input: a list of distances
 # Output: order to visit locations in in order to visit all locations
 #         in shortest amount of time
-def findShortestPath(distances):
-    return null
+# Method: Dijkstra's Algorithm
+# Source: Internet
+def dijsktra(distances, placesList):
+    # shortest paths is a dict of nodes
+    # whose value is a tuple of (previous node, weight)
+    initial = 0
+    shortest_paths = {initial: (None, 0)}
+    current_node = initial
+    visited = set()
+
+    unvisited = set()
+    for i in range(len(distances[0])):
+        unvisited.add(i)
+    unvisited.remove(0)
+
+    path = []
+
+    while len(unvisited) is not 0:
+        path.append(placesList[current_node])
+        visited.add(current_node)
+        destinations = unvisited
+        weight_to_current_node = shortest_paths[current_node][1]
+
+        for next_node in destinations:
+            weight = distances[current_node][next_node] + weight_to_current_node
+            if next_node not in shortest_paths:
+                shortest_paths[next_node] = (current_node, weight)
+            else:
+                current_shortest_weight = shortest_paths[next_node][1]
+                if current_shortest_weight > weight:
+                    shortest_paths[next_node] = (current_node, weight)
+
+        next_destinations = {node: shortest_paths[node] for node in shortest_paths if node not in visited}
+        if not next_destinations:
+            return "Route Not Possible"
+
+        # next node is the destination with the lowest weight
+        current_node = min(next_destinations, key=lambda k: next_destinations[k][1])
+        unvisited.remove(current_node)
+
+    return path
 
 
 
@@ -71,7 +115,6 @@ api_key = '5b3ce3597851110001cf6248aa99e3ffa6984f3390e3f886fc85a33c'
 # the output is a square matrix formatted as an array of a arrays
 def distMatrix(listOfCoords):
     body = {"locations": listOfCoords}
-    print(body)
 
     call = requests.post('https://api.openrouteservice.org/v2/matrix/driving-car', json=body, headers=headers)
 
