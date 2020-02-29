@@ -2,6 +2,9 @@
 
 ## Hello Users,
 
+UPDATE: New Dependency
+- run `python -m pip install --upgrade --user ortools`
+
 To get this project running on your computer :
 - navigate to `react-frontend`
 - run `npm run build`
