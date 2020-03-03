@@ -1,7 +1,14 @@
 import React from 'react';
 import axios from 'axios';
 import './App.css';
-import logo from './logo.png'
+import logo from './logo.png';
+import { Map, GoogleApiWrapper } from 'google-maps-react';
+
+const mapStyles = {
+    position: 'relative',
+    width: '50vw',
+    height: '50vw',
+};
 
 class App extends React.Component {
 
@@ -42,18 +49,22 @@ class App extends React.Component {
                     Happy campaigning!
                 </div>
 
-                <div className="App-header">
-                    <div className="App-map">Map</div>
-                    <div className="App-rightSide">
-                        <div>Choose a CSV:</div>
-                        <input type="file"
-                            ref={(input) => { this.filesInput = input }}
-                            name="file"
-                            label="Upload CSV"
-                            onChange={this.uploadFile}
-                        />
-                    </div>
-                </div>
+                <table className="App-header">
+                    <tr className="App-row">
+                        <th className="App-Sides">
+                            <Map style={mapStyles} google={this.props.google} zoom={4} initialCenter={{ lat: 47.444, lng: -122.176}}></Map>
+                        </th>
+                        <th className="App-Sides">
+                            <div>Choose a CSV:</div>
+                            <input type="file"
+                                ref={(input) => { this.filesInput = input }}
+                                name="file"
+                                label="Upload CSV"
+                                onChange={this.uploadFile}
+                            />
+                        </th>
+                    </tr>
+                </table>
 
                 <div className="App-credits">This site uses OpenStreetRoute.</div>
 
@@ -62,4 +73,6 @@ class App extends React.Component {
     }
 }
 
-export default App;
+export default GoogleApiWrapper({
+    apiKey: 'AIzaSyCOhukeA-4msXp_y45e1ZekcXC-oPP2y9I'
+  })(App);
