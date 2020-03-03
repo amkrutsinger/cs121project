@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import axios from 'axios';
 import './App.css';
 import logo from './logo.png';
@@ -11,6 +11,16 @@ const mapStyles = {
 };
 
 class App extends React.Component {
+
+    constructor (props){
+        super(props);
+      
+        this.state = {
+            needToUpdate: false,
+        };
+
+        this.uploadFile = this.uploadFile.bind(this);
+    }
 
     // Use: upload .csv file to flask/python for further analysis
     // Taken from Stack Overflow
@@ -30,6 +40,7 @@ class App extends React.Component {
     }
 
     render() {
+        console.log("rendered")
         return (
             <div className="App">
                 <div className="App-logo">
@@ -51,10 +62,10 @@ class App extends React.Component {
 
                 <table className="App-header">
                     <tr className="App-row">
-                        <th className="App-Sides">
+                        <th className="App-Map">
                             <Map style={mapStyles} google={this.props.google} zoom={4} initialCenter={{ lat: 47.444, lng: -122.176}}></Map>
                         </th>
-                        <th className="App-Sides">
+                        <th className="App-CSV-Upload">
                             <div>Choose a CSV:</div>
                             <input type="file"
                                 ref={(input) => { this.filesInput = input }}
@@ -62,6 +73,7 @@ class App extends React.Component {
                                 label="Upload CSV"
                                 onChange={this.uploadFile}
                             />
+                            <div>The route: {window.routes}</div>
                         </th>
                     </tr>
                 </table>

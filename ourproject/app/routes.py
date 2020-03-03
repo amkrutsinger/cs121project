@@ -37,7 +37,7 @@ def findRoutes():
 
         # For Testing
         print (', '.join(errors))
-    return render_template("index.html")
+    return render_template("index.html", routes = actualRoutes)
 
 
 

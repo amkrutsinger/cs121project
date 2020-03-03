@@ -19,9 +19,15 @@
   width: 100%;
 }
 
-.App-Sides {
+.App-Map {
   color: blue;
   width: 50vw;
+}
+
+.App-CSV-Upload {
+  color: blue;
+  width: 50vw;
+  position: relative;
 }
 
 @keyframes App-logo-spin {
