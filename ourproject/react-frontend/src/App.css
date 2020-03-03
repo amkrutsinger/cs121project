@@ -7,35 +7,21 @@
   pointer-events: none;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
 .App-header {
-  background-color: powderblue;
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
-  padding: 10px;
-}
-
-.App-map {
-  background-color: burlywood;
-  color: gray;
-  float: left;
-  width: 50vw;
+  table-layout: fixed;
+  display: block;
+  width: 100%;
   height: 50vw;
 }
 
-.App-rightSide {
+.App-row {
+  display: block;
+  width: 100%;
+}
+
+.App-Sides {
   color: blue;
-  float: left;
-  width: 50%;
+  width: 50vw;
 }
 
 @keyframes App-logo-spin {

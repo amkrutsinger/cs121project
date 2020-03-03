@@ -82,7 +82,7 @@ headers = {
 'Content-Type': 'application/json; charset=utf-8'
 }
 
-beginningOfUrl = 'https://api.openrouteservice.org/geocode/autocomplete?'
+beginningOfUrl = 'https://api.openrouteservice.org/geocode/search?'
 api_key = '5b3ce3597851110001cf6248aa99e3ffa6984f3390e3f886fc85a33c'
 
 
@@ -109,6 +109,7 @@ def addressesToCoordinates(list):
             errors.append(result)
         else:
             coords.append(result)
+    print(coords)
     return coords, errors
 
 
