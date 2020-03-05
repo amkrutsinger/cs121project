@@ -2,11 +2,14 @@
 
 ## Hello Users,
 
+UPDATE: New Dependency
+- run `python -m pip install --upgrade --user ortools`
+
 To get this project running on your computer :
 - navigate to `react-frontend`
-- run `nom run build`
+- run `npm run build`
 - navigate back to `ourproject`
-- run `python microblog.py`
+- run `python microblog.py` or `FLASK_APP=microblog.py flask run`
 
 You may need to install dependencies (webpack, babel, flask, etc.)
 
