@@ -5,8 +5,8 @@ import logo from './logo.png';
 // Display our PageHeader - This includes
 //  -- upper left icon
 //  -- large centered black title text
-//  -- smaller centered black subtitle text (different font)
-function PageHeader() {
+//  -- smaller centered subtitle text
+function PageHead() {
  return (
      <div >
         <div class="hasicon">
@@ -18,6 +18,21 @@ function PageHeader() {
         </header>
     </div>
  )
+}
+
+// Display our menu
+// The menu items are "Home" "How It Works" "About Us"
+// Menu items should be equally spaced across page
+function Menu() {
+}
+
+function PageHeader() {
+    return (
+        <div>
+            <PageHead />
+            <Menu />
+        </div>
+    )
 }
 
 export default PageHeader
