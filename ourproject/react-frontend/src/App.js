@@ -1,8 +1,8 @@
 import React from 'react';
 import axios from 'axios';
 import './App.css';
-import logo from './logo.png';
 import { Map, GoogleApiWrapper } from 'google-maps-react';
+import PageHeader from './pageHeader'
 
 const mapStyles = {
     position: 'relative',
@@ -32,12 +32,7 @@ class App extends React.Component {
     render() {
         return (
             <div className="App">
-                <div className="App-logo">
-                    <img src={logo} alt="GrassRoutes"/>
-                </div>
-
-                <div className="App-title">GrassRoutes</div>
-                <div className="App-subtitle">Intelligent Mapping for Political Campaigns</div>
+                <PageHeader />
 
               	 <div className="App-about">
                     Welcome.
