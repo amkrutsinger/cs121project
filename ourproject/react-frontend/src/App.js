@@ -32,6 +32,7 @@ function Step1() {
     )
 }
 
+
 // Display instructions for step 2 of the process (verifying addresses)
 function Step2() {
     return (
@@ -51,7 +52,13 @@ class App extends React.Component {
     //    Step 1: Upload CSV file
     //    Step 2: Add/Remove addresses
     //    Step 3: Set Parameters (e.g. number of campaigners)
+    //    Loading page (depending on time of algorithm)
     //    Result: display path, statistics
+
+    // Potentially also add menu. Ideas for sections ...
+    // "Home" - The initial homepage and essential interactions
+    // "How it Works" - Explain algorithm, steps to use step, credit sources
+    // "About Us" - Explain that we are HMC students working on a school project
 
     // Initialize states (what parts are visible)
     state = {
@@ -75,7 +82,7 @@ class App extends React.Component {
         .catch(err => console.warn(err));
     }
 
-    // Show only Welcome component
+    // Show only Welcome component, hide others
     showWelcome = () => {
         this.setState({
           isWelcomeActive: true,
@@ -84,7 +91,7 @@ class App extends React.Component {
         })
     }
 
-    // Show only Step 1 component
+    // Show only Step 1 component, hide others
     showStep1 = () => {
         this.setState({
           isWelcomeActive: false,
@@ -93,7 +100,7 @@ class App extends React.Component {
         })
     }
 
-    // Show only Step 2 component
+    // Show only Step 2 component, hide others
     showStep2 = () => {
         this.setState({
           isWelcomeActive: false,
@@ -110,8 +117,10 @@ class App extends React.Component {
                 <PageHeader />
                 <html>
                     <div className="page">
+                        {/* Everything in this div will be displayed in the white box */}
                         <div className="container">
 
+                            {/* This is the initial message you see */}
                             {this.state.isWelcomeActive &&
                                 <div className="welcome">
                                     <Welcome />
@@ -119,6 +128,7 @@ class App extends React.Component {
                                 </div>
                             }
 
+                            {/* This is what you see after clicking the "Get Started" button */}
                             {this.state.isStep1Active &&
                                 <div className="step1">
                                     <button className="button-alt" onClick={this.showWelcome}>Back</button>
@@ -137,6 +147,7 @@ class App extends React.Component {
                                 </div>
                             }
 
+                            {/* This is what you see after selected a CSV file */}
                             {this.state.isStep2Active &&
                                 <div className="step2">
                                     <button className="button-alt" onClick={this.showStep1}>Back</button>
@@ -148,7 +159,8 @@ class App extends React.Component {
                                     <table className="App-header">
                                         <tr className="App-row">
                                             <th className="App-Sides">
-                                                <Map style={mapStyles} google={this.props.google} zoom={4} initialCenter={{ lat: 47.444, lng: -122.176}}></Map>
+                                                <Map style={mapStyles} google={this.props.google} zoom={4} initialCenter={{ lat: 47.444, lng: -122.176}}>
+                                                </Map>
                                             </th>
                                             <th className="App-Sides">
                                                 <div className="text">Add Address</div>
@@ -158,6 +170,10 @@ class App extends React.Component {
                                     </table>
                                 </div>
                             }
+
+                            {/* Add section to adjust paramters of route */}
+                            {/* Add section to display route */}
+                            {/* When adding code, move as much as possible to outside functions to avoid clutter */}
 
                         </div>
                     </div>
