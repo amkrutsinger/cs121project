@@ -6,7 +6,9 @@ import logo from './logo.png';
 //  -- upper left icon
 //  -- large centered black title text
 //  -- smaller centered subtitle text
-function PageHead() {
+
+// TODO: Add a menu with "Home" "How it Works" "About Us" tabs
+function PageHeader() {
  return (
      <div >
         <div class="hasicon">
@@ -18,20 +20,6 @@ function PageHead() {
         </header>
     </div>
  )
-}
-
-// Display our menu
-// The menu items are "Home" "How It Works" "About Us"
-// Menu items should be equally spaced across page
-function Menu() {
-}
-
-function PageHeader() {
-    return (
-        <div>
-            <PageHead />
-        </div>
-    )
 }
 
 export default PageHeader
