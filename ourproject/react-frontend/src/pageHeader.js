@@ -30,7 +30,6 @@ function PageHeader() {
     return (
         <div>
             <PageHead />
-            <Menu />
         </div>
     )
 }
