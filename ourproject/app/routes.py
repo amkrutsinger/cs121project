@@ -25,7 +25,7 @@ def findRoutes():
         placesList = getInput()
 
         # Convert array of places to distance matrix, array of invalid places
-        distances, errors = parseInput(placesList)
+        distances, coords, errors = parseInput(placesList)
 
         # algorithm assumes starting and ending at first location
         # routeTimes returned in seconds
@@ -34,10 +34,7 @@ def findRoutes():
         print(maxRouteTime)
         print(actualRoutes)
         print(routeTimes)
-
-        # For Testing
-        print (', '.join(errors))
-    return render_template("index.html", routes = actualRoutes)
+    return render_template("index.html")
 
 
 
@@ -61,7 +58,7 @@ def getInput():
 def parseInput(placesList):
     coords, errors = addressesToCoordinates(placesList)
     distances = distMatrix(coords)
-    return distances, errors
+    return distances, coords, errors
 
 # Input:  a list of distances and number of people
 # Output: a route for each person such that all locations are visited in the
