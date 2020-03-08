@@ -5,8 +5,7 @@ import { Map, GoogleApiWrapper } from 'google-maps-react';
 import PageHeader from './pageHeader'
 
 const mapStyles = {
-    position: 'relative',
-    width: '50vw',
+    position: 'absolute',
     height: '50vw',
 };
 
@@ -160,7 +159,7 @@ class App extends React.Component {
                                     {/* TODO: Add Functionality to Add/Remove Addresses */}
                                     <table className="App-header">
                                         <tr className="App-row">
-                                            <th className="App-Sides">
+                                            <th className="App-Sides" id="mapBox">
                                                 <Map style={mapStyles} google={this.props.google} zoom={4} initialCenter={{ lat: 47.444, lng: -122.176}}>
                                                 </Map>
                                             </th>

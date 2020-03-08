@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request
 from app import app
 import csv, io, requests, json, sys
+import time
 
 from ortools.constraint_solver import routing_enums_pb2
 from ortools.constraint_solver import pywrapcp
@@ -23,15 +24,13 @@ def findRoutes():
 
         # Read in csv file and convert to array of places
         placesList = getInput()
-
-        # Convert array of places to distance matrix, array of invalid places
         distances, coords, errors = parseInput(placesList)
 
         # algorithm assumes starting and ending at first location
         # routeTimes returned in seconds
         # Find solution to Vehicle Routing Problem
+
         maxRouteTime, actualRoutes, routeTimes = getOutput(distances, placesList, numPeople, sys.maxsize)
-        print(maxRouteTime)
         print(actualRoutes)
         print(routeTimes)
     return render_template("index.html")
@@ -107,6 +106,7 @@ def addressesToCoordinates(list):
         else:
             coords.append(result)
     print(coords)
+    print("")
     return coords, errors
 
 
