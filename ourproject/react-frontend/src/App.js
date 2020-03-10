@@ -86,11 +86,14 @@ class App extends React.Component {
         .catch(err => console.warn(err));
     }
 
+    // This allows the input field for the number of canvassers to change 
+    // and updates the state accordingly
     changeNumCanvassers(e) {
         e.preventDefault();
         this.setState({numPeople: e.target.value})
     }
 
+    // This updates the routing algorithm when number of canvasser changes is applied
     updateRoutes(e) {
         const numCanvassers = {"numPeople": this.state.numPeople};
 
