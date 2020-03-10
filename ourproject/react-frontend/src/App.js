@@ -42,8 +42,6 @@ function Step2() {
     )
 }
 
-
-
 class App extends React.Component {
 
 
@@ -88,9 +86,12 @@ class App extends React.Component {
         .catch(err => console.warn(err));
     }
 
-    sendNumCanvassers(e) {
+    changeNumCanvassers(e) {
         e.preventDefault();
         this.setState({numPeople: e.target.value})
+    }
+
+    updateRoutes(e) {
         const numCanvassers = {"numPeople": this.state.numPeople};
 
         axios
@@ -151,17 +152,29 @@ class App extends React.Component {
                                 <div className="step1">
                                     <button className="button-alt" onClick={this.showWelcome}>Back</button>
                                     <Step1 />
-
-                                    {/* Input File Button */}
-                                    <input
-                                        type="file"
-                                        name="file"
-                                        id="file"
-                                        class="inputfile"
-                                        ref={(input) => { this.filesInput = input }}
-                                        onChange={e => { this.uploadFile(e); this.showStep2() }}
-                                    />
-                                    <label for="file">Choose a CSV file</label>
+                                    <div className="Button-Container">
+                                        {/* Input File Button */}
+                                        <input
+                                            type="file"
+                                            name="file"
+                                            id="file"
+                                            class="inputfile"
+                                            ref={(input) => { this.filesInput = input }}
+                                            onChange={e => { this.uploadFile(e); this.showStep2() }}
+                                        />
+                                        <label for="file">Choose a CSV file</label>
+                                    </div>
+                                    <p className ="text"> How many canvassers do you have? </p>
+                                    <div>
+                                        <input type="number"
+                                                        name="numCanvassers"
+                                                        id="numCanvassers"
+                                                        class="inputNum"
+                                                        value={this.state.numPeople}
+                                                        ref={(input) => { this.filesInput = input }}
+                                                        onChange={e => {this.changeNumCanvassers(e)}}>
+                                        </input>
+                                    </div>
                                 </div>
                             }
 
@@ -181,23 +194,27 @@ class App extends React.Component {
                                                 </Map>
                                             </th>
                                             <th className="App-Sides">
+                                                {/* Add ability to adjust more paramaters of route */}
                                                 <div className="text">Add Address</div>
                                                 <div className="text">Remove Address</div>
-                                                <input type="number"
-                                                    name="numCanvassers"
-                                                    id="numCanvassers"
-                                                    class="inputNum"
-                                                    value={this.state.numPeople}
-                                                    ref={(input) => { this.filesInput = input }}
-                                                    onChange={e => {this.sendNumCanvassers(e)}}>
-                                                </input>
+                                                <div className="text">Number Of Canvassers:</div>
+                                                <div class="description">
+                                                    <input type="number"
+                                                        name="numCanvassers"
+                                                        id="numCanvassers"
+                                                        class="inputNum"
+                                                        value={this.state.numPeople}
+                                                        ref={(input) => { this.filesInput = input }}
+                                                        onChange={e => {this.changeNumCanvassers(e)}}>
+                                                    </input>
+                                                </div>
+                                                <button class="button" onClick={e => {this.updateRoutes(e)}}>Apply Changes</button>
                                             </th>
                                         </tr>
                                     </table>
                                 </div>
                             }
 
-                            {/* Add section to adjust paramters of route */}
                             {/* Add section to display route */}
                             {/* When adding code, move as much as possible to outside functions to avoid clutter */}
 
