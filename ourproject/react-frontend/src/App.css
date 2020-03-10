@@ -84,17 +84,33 @@ html {
   table-layout: fixed;
   display: block;
   width: 100%;
-  height: 50vw;
+  height: 75%;
 }
 
 .App-row {
   display: block;
   width: 100%;
+  vertical-align: inherit;
+}
+
+.App-Map {
+  color: blue;
+  width: 50vw;
+}
+
+.App-CSV-Upload {
+  color: blue;
+  width: 50vw;
+  position: relative;
 }
 
 .App-Sides {
-  color: blue;
   width: 50vw;
+  vertical-align: top;
+}
+
+#mapBox div:first-child {
+  position: relative !important;
 }
 
 @keyframes App-logo-spin {

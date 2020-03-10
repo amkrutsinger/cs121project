@@ -1,12 +1,11 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import axios from 'axios';
 import './App.css';
 import { Map, GoogleApiWrapper } from 'google-maps-react';
 import PageHeader from './pageHeader'
 
 const mapStyles = {
-    position: 'relative',
-    width: '50vw',
+    position: 'absolute',
     height: '50vw',
 };
 
@@ -47,6 +46,7 @@ function Step2() {
 
 class App extends React.Component {
 
+
     // Overview:
     //    Welcome: introductory message, get started button
     //    Step 1: Upload CSV file
@@ -61,10 +61,15 @@ class App extends React.Component {
     // "About Us" - Explain that we are HMC students working on a school project
 
     // Initialize states (what parts are visible)
-    state = {
-        isWelcomeActive: true,
-        isStep1Active: false,
-        isStep2Active: false,
+    constructor(props) {
+        super(props);
+        this.state = 
+        {
+            isWelcomeActive: true,
+            isStep1Active: false,
+            isStep2Active: false,
+            numPeople: 1,
+        };
     }
 
     // Use: upload .csv file to flask/python for further analysis
@@ -75,11 +80,23 @@ class App extends React.Component {
       const formData = new FormData();
 
       formData.append("file", file);
+      formData.append("numPeople", this.state.numPeople.toString())
 
       axios
         .post("/findRoutes", formData)
         .then(res => console.log(res))
         .catch(err => console.warn(err));
+    }
+
+    sendNumCanvassers(e) {
+        e.preventDefault();
+        this.setState({numPeople: e.target.value})
+        const numCanvassers = {"numPeople": this.state.numPeople};
+
+        axios
+          .post("/numCanvassersChanged", numCanvassers)
+          .then(res => console.log(res))
+          .catch(err => console.warn(err));
     }
 
     // Show only Welcome component, hide others
@@ -112,6 +129,7 @@ class App extends React.Component {
 
 
     render() {
+        console.log("rendered")
         return (
             <div className="App">
                 <PageHeader />
@@ -158,13 +176,21 @@ class App extends React.Component {
                                     {/* TODO: Add Functionality to Add/Remove Addresses */}
                                     <table className="App-header">
                                         <tr className="App-row">
-                                            <th className="App-Sides">
+                                            <th className="App-Sides" id="mapBox">
                                                 <Map style={mapStyles} google={this.props.google} zoom={4} initialCenter={{ lat: 47.444, lng: -122.176}}>
                                                 </Map>
                                             </th>
                                             <th className="App-Sides">
                                                 <div className="text">Add Address</div>
                                                 <div className="text">Remove Address</div>
+                                                <input type="number"
+                                                    name="numCanvassers"
+                                                    id="numCanvassers"
+                                                    class="inputNum"
+                                                    value={this.state.numPeople}
+                                                    ref={(input) => { this.filesInput = input }}
+                                                    onChange={e => {this.sendNumCanvassers(e)}}>
+                                                </input>
                                             </th>
                                         </tr>
                                     </table>

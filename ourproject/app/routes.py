@@ -1,10 +1,11 @@
 from flask import Flask, render_template, request
 from app import app
+from .config import GetLocations
 import csv, io, requests, json, sys
+import time
 
 from ortools.constraint_solver import routing_enums_pb2
 from ortools.constraint_solver import pywrapcp
-
 
 # --- ROUTES --- #
 
@@ -19,24 +20,44 @@ def index():
 @app.route('/findRoutes', methods = ['POST'])
 def findRoutes():
     if request.method == 'POST':
-        numPeople = 1
+        numPeople = 2
+        numPeople = int(request.form['numPeople'])
 
         # Read in csv file and convert to array of places
-        placesList = getInput()
-
-        # Convert array of places to distance matrix, array of invalid places
-        distances, coords, errors = parseInput(placesList)
+        GetLocations.placesList = getInput()
+        distances, coords, errors = parseInput(GetLocations.placesList)
+        # Save this data
+        GetLocations.distances = distances
+        GetLocations.coords = coords
+        GetLocations.errors = errors
 
         # algorithm assumes starting and ending at first location
         # routeTimes returned in seconds
         # Find solution to Vehicle Routing Problem
-        maxRouteTime, actualRoutes, routeTimes = getOutput(distances, placesList, numPeople, sys.maxsize)
-        print(maxRouteTime)
+
+        maxRouteTime, actualRoutes, routeTimes = getOutput(distances, GetLocations.placesList, numPeople, sys.maxsize)
         print(actualRoutes)
         print(routeTimes)
-
     return render_template("index.html")
 
+@app.route('/numCanvassersChanged', methods = ['POST'])
+def numCanvassersChanged():
+    if request.method == 'POST':
+        # get the new number of people from the input field
+        numPeople = int(request.get_json()['numPeople'])
+        print("")
+        print(numPeople)
+        print("")
+
+        # use the saved locations
+        # algorithm assumes starting and ending at first location
+        # routeTimes returned in seconds
+        # Find solution to Vehicle Routing Problem
+
+        maxRouteTime, actualRoutes, routeTimes = getOutput(GetLocations.distances, GetLocations.placesList, numPeople, sys.maxsize)
+        print(actualRoutes)
+        print(routeTimes)
+    return render_template("index.html")
 
 
 # --- INTERFACE FUNCTIONS --- #
@@ -108,6 +129,7 @@ def addressesToCoordinates(list):
         else:
             coords.append(result)
     print(coords)
+    print("")
     return coords, errors
 
 
@@ -141,7 +163,7 @@ def addressToCoord(addr):
 def create_data_model(distances, numPeople):
     data = {}
     data['distance_matrix'] = distances
-    data['num_vehicles'] = 1
+    data['num_vehicles'] = numPeople
     data['depot'] = 0
     return data
 
