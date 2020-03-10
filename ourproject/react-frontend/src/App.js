@@ -61,10 +61,15 @@ class App extends React.Component {
     // "About Us" - Explain that we are HMC students working on a school project
 
     // Initialize states (what parts are visible)
-    state = {
-        isWelcomeActive: true,
-        isStep1Active: false,
-        isStep2Active: false,
+    constructor(props) {
+        super(props);
+        this.state = 
+        {
+            isWelcomeActive: true,
+            isStep1Active: false,
+            isStep2Active: false,
+            numPeople: 1,
+        };
     }
 
     // Use: upload .csv file to flask/python for further analysis
@@ -75,11 +80,23 @@ class App extends React.Component {
       const formData = new FormData();
 
       formData.append("file", file);
+      formData.append("numPeople", this.state.numPeople.toString())
 
       axios
         .post("/findRoutes", formData)
         .then(res => console.log(res))
         .catch(err => console.warn(err));
+    }
+
+    sendNumCanvassers(e) {
+        e.preventDefault();
+        this.setState({numPeople: e.target.value})
+        const numCanvassers = {"numPeople": this.state.numPeople};
+
+        axios
+          .post("/numCanvassersChanged", numCanvassers)
+          .then(res => console.log(res))
+          .catch(err => console.warn(err));
     }
 
     // Show only Welcome component, hide others
@@ -166,6 +183,14 @@ class App extends React.Component {
                                             <th className="App-Sides">
                                                 <div className="text">Add Address</div>
                                                 <div className="text">Remove Address</div>
+                                                <input type="number"
+                                                    name="numCanvassers"
+                                                    id="numCanvassers"
+                                                    class="inputNum"
+                                                    value={this.state.numPeople}
+                                                    ref={(input) => { this.filesInput = input }}
+                                                    onChange={e => {this.sendNumCanvassers(e)}}>
+                                                </input>
                                             </th>
                                         </tr>
                                     </table>
