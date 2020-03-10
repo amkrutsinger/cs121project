@@ -20,7 +20,6 @@ def index():
 @app.route('/findRoutes', methods = ['POST'])
 def findRoutes():
     if request.method == 'POST':
-        numPeople = 2
         numPeople = int(request.form['numPeople'])
 
         # Read in csv file and convert to array of places
