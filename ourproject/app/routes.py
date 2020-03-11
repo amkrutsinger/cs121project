@@ -34,7 +34,7 @@ def findRoutes():
         # routeTimes returned in seconds
         # Find solution to Vehicle Routing Problem
 
-        maxRouteTime, actualRoutes, routeTimes = getOutput(distances, GetLocations.placesList, numPeople, sys.maxsize)
+        maxRouteTime, actualRoutes, routeTimes = getOutput(distances, GetLocations.coords, numPeople, sys.maxsize)
         # TO DO: send flask to react
         print(actualRoutes)
         print(routeTimes)
@@ -54,7 +54,7 @@ def numCanvassersChanged():
         # routeTimes returned in seconds
         # Find solution to Vehicle Routing Problem
 
-        maxRouteTime, actualRoutes, routeTimes = getOutput(GetLocations.distances, GetLocations.placesList, numPeople, sys.maxsize)
+        maxRouteTime, actualRoutes, routeTimes = getOutput(GetLocations.distances, GetLocations.coords, numPeople, sys.maxsize)
         # TO DO: send flask to react
         print(actualRoutes)
         print(routeTimes)
