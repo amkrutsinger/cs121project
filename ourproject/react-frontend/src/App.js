@@ -1,14 +1,11 @@
 import React, {useEffect} from 'react';
 import axios from 'axios';
 import './App.css';
-import { Map, GoogleApiWrapper } from 'google-maps-react';
+import Directions from "./components/Directions/DirectionsIndex";
 import PageHeader from './pageHeader'
 
-const mapStyles = {
-    position: 'absolute',
-    height: '50vw',
-};
 
+const locationsRoutes = [[[-117.7103941, 34.1069287], [-117.709978, 34.124954], [-117.709978, 34.124954], [-117.709978, 34.124954], [-117.709978, 34.124954], [-117.7326799, 34.1029753], [-117.732929, 34.103057], [-117.732929, 34.103057], [-117.7301553, 34.1021421], [-117.712313, 34.106128], [-117.7103941, 34.1069287]], [[-117.7103941, 34.1069287], [-117.706468, 34.107061], [-117.71376, 34.127773], [-117.71376, 34.127773], [-117.71376, 34.127773], [-117.71376, 34.127773], [-117.718033, 34.118387], [-117.7163543, 34.1183734], [-117.7153621, 34.1183494], [-117.718033, 34.118387], [-117.724298, 34.116698], [-117.7258054, 34.1166113], [-117.733133, 34.116757], [-117.733133, 34.116757], [-117.7111516, 34.1069425], [-117.7103941, 34.1069287]]];
 
 // Display our introductory text (w/ styling)
 function Welcome() {
@@ -42,7 +39,7 @@ function Step2() {
     )
 }
 
-class App extends React.Component {
+export default class App extends React.Component {
 
 
     // Overview:
@@ -67,6 +64,7 @@ class App extends React.Component {
             isStep1Active: false,
             isStep2Active: false,
             numPeople: 1,
+            currentMap: 0,
         };
     }
 
@@ -91,6 +89,11 @@ class App extends React.Component {
     changeNumCanvassers(e) {
         e.preventDefault();
         this.setState({numPeople: e.target.value})
+    }
+
+    changeCurrentMap(e) {
+        e.preventDefault();
+        this.setState({currentMap: this.state.currentMap + 1})
     }
 
     // This updates the routing algorithm when number of canvasser changes is applied
@@ -134,6 +137,7 @@ class App extends React.Component {
 
     render() {
         console.log("rendered")
+        console.log(this.state.currentMap % locationsRoutes.length)
         return (
             <div className="App">
                 <PageHeader />
@@ -193,8 +197,8 @@ class App extends React.Component {
                                     <table className="App-header">
                                         <tr className="App-row">
                                             <th className="App-Sides" id="mapBox">
-                                                <Map style={mapStyles} google={this.props.google} zoom={4} initialCenter={{ lat: 47.444, lng: -122.176}}>
-                                                </Map>
+                                                <Directions coordRoute={locationsRoutes[this.state.currentMap % locationsRoutes.length]}/>
+                                                <button class="button" onClick={e => {this.changeCurrentMap(e)}}>Next Route</button>
                                             </th>
                                             <th className="App-Sides">
                                                 {/* Add ability to adjust more paramaters of route */}
@@ -228,7 +232,3 @@ class App extends React.Component {
         )
     }
 }
-
-export default GoogleApiWrapper({
-    apiKey: 'AIzaSyCOhukeA-4msXp_y45e1ZekcXC-oPP2y9I'
-  })(App);
