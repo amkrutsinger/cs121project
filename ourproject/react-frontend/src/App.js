@@ -4,7 +4,8 @@ import './App.css';
 import Directions from "./components/Directions/DirectionsIndex";
 import PageHeader from './pageHeader'
 
-
+// This is the width at which the screen with the map switches between side by side and vertical organization.
+const critWidth = 1000;
 const locationsRoutes = [[[-117.7103941, 34.1069287], [-117.709978, 34.124954], [-117.709978, 34.124954], [-117.709978, 34.124954], [-117.709978, 34.124954], [-117.7326799, 34.1029753], [-117.732929, 34.103057], [-117.732929, 34.103057], [-117.7301553, 34.1021421], [-117.712313, 34.106128], [-117.7103941, 34.1069287]], [[-117.7103941, 34.1069287], [-117.706468, 34.107061], [-117.71376, 34.127773], [-117.71376, 34.127773], [-117.71376, 34.127773], [-117.71376, 34.127773], [-117.718033, 34.118387], [-117.7163543, 34.1183734], [-117.7153621, 34.1183494], [-117.718033, 34.118387], [-117.724298, 34.116698], [-117.7258054, 34.1166113], [-117.733133, 34.116757], [-117.733133, 34.116757], [-117.7111516, 34.1069425], [-117.7103941, 34.1069287]]];
 
 // Display our introductory text (w/ styling)
@@ -65,6 +66,7 @@ export default class App extends React.Component {
             isStep2Active: false,
             numPeople: 1,
             currentMap: 0,
+            wide: window.innerWidth > critWidth,
         };
     }
 
@@ -91,9 +93,9 @@ export default class App extends React.Component {
         this.setState({numPeople: e.target.value})
     }
 
-    changeCurrentMap(e) {
+    changeCurrentMap(e, changer) {
         e.preventDefault();
-        this.setState({currentMap: this.state.currentMap + 1})
+        this.setState({currentMap: ((this.state.currentMap + changer) >= 0 ? this.state.currentMap + changer : 0)})
     }
 
     // This updates the routing algorithm when number of canvasser changes is applied
@@ -133,7 +135,26 @@ export default class App extends React.Component {
         })
     }
 
+    // Deal with narrow windows better
 
+    /**
+     * Calculate & Update state of new dimensions
+     */
+    updateDimensions() {
+      if (window.innerWidth > critWidth && !this.state.wide) {
+        this.setState({ wide: true});
+      } else if (this.state.wide && window.innerWidth < critWidth) {
+        this.setState({ wide: false});
+      }
+    }
+
+    /**
+     * Add event listener
+     */
+    componentDidMount() {
+      this.updateDimensions();
+      window.addEventListener("resize", this.updateDimensions.bind(this));
+    }
 
     render() {
         console.log("rendered")
@@ -194,14 +215,46 @@ export default class App extends React.Component {
                                     {/* Display Map  */}
                                     {/* TODO: Show locations  */}
                                     {/* TODO: Add Functionality to Add/Remove Addresses */}
-                                    <table className="App-header">
-                                        <tr className="App-row">
-                                            <th className="App-Sides" id="mapBox">
+                                    {/* When screen is wide side by side map and editor*/}
+                                    {this.state.wide &&
+                                        <table className="App-header">
+                                            <tr className="App-row">
+                                                <th className="App-Sides" id="mapBox">
+                                                    <Directions coordRoute={locationsRoutes[this.state.currentMap % locationsRoutes.length]}/>
+                                                    <div className="text"> Route: {this.state.currentMap % locationsRoutes.length + 1}</div>
+                                                    <button class="button" onClick={e => {this.changeCurrentMap(e, -1)}}>Previous</button>
+                                                    <button class="button" onClick={e => {this.changeCurrentMap(e, 1)}}>Next</button>
+                                                </th>
+                                                <th className="App-Sides">
+                                                    {/* Add ability to adjust more paramaters of route */}
+                                                    <div className="text">Add Address</div>
+                                                    <div className="text">Remove Address</div>
+                                                    <div className="text">Number Of Canvassers:</div>
+                                                    <div class="description">
+                                                        <input type="number"
+                                                            name="numCanvassers"
+                                                            id="numCanvassers"
+                                                            class="inputNum"
+                                                            value={this.state.numPeople}
+                                                            ref={(input) => { this.filesInput = input }}
+                                                            onChange={e => {this.changeNumCanvassers(e)}}>
+                                                        </input>
+                                                    </div>
+                                                    <button class="button" onClick={e => {this.updateRoutes(e)}}>Apply Changes</button>
+                                                </th>
+                                            </tr>
+                                        </table>
+                                    }
+                                    {/* When screen is narrow show map above editors */}
+                                    {!this.state.wide && 
+                                        <div>
+                                            <div>
                                                 <Directions coordRoute={locationsRoutes[this.state.currentMap % locationsRoutes.length]}/>
-                                                <button class="button" onClick={e => {this.changeCurrentMap(e)}}>Next Route</button>
-                                            </th>
-                                            <th className="App-Sides">
-                                                {/* Add ability to adjust more paramaters of route */}
+                                                <div className="text"> Route: {this.state.currentMap % locationsRoutes.length + 1}</div>
+                                                <button class="button" onClick={e => {this.changeCurrentMap(e, -1)}}>Previous</button>
+                                                <button class="button" onClick={e => {this.changeCurrentMap(e, 1)}}>Next</button>
+                                            </div>
+                                            <div>
                                                 <div className="text">Add Address</div>
                                                 <div className="text">Remove Address</div>
                                                 <div className="text">Number Of Canvassers:</div>
@@ -216,9 +269,9 @@ export default class App extends React.Component {
                                                     </input>
                                                 </div>
                                                 <button class="button" onClick={e => {this.updateRoutes(e)}}>Apply Changes</button>
-                                            </th>
-                                        </tr>
-                                    </table>
+                                            </div>
+                                        </div>
+                                    }
                                 </div>
                             }
 
