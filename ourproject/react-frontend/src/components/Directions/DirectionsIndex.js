@@ -32,7 +32,7 @@ class Directions extends Component {
         <DirectionRenderComponent
               key={this.props.coordRoute}
               index=""
-              strokeColor="#18ff14"
+              strokeColor="#6e9ff0"
               // Send the first and last locations as latlngobjects to the directions renderer
               from={createLatLngObject(this.props.coordRoute[0])}
               to={createLatLngObject(this.props.coordRoute[this.props.coordRoute.length-1])}
