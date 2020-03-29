@@ -1,15 +1,12 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import axios from 'axios';
 import './App.css';
-import logo from './logo.png';
-import { Map, GoogleApiWrapper } from 'google-maps-react';
+import Directions from "./components/Directions/DirectionsIndex";
+import PageHeader from './pageHeader'
+import { withState } from 'recompose';
 
-const mapStyles = {
-    position: 'relative',
-    width: '50vw',
-    height: '50vw',
-};
-
+// This is the width at which the screen with the map switches between side by side and vertical organization.
+const critWidth = 1000;
 // const locationsRoutes = [[[-117.7103941, 34.1069287], [-117.709978, 34.124954], [-117.709978, 34.124954], [-117.709978, 34.124954], [-117.709978, 34.124954], [-117.7326799, 34.1029753], [-117.732929, 34.103057], [-117.732929, 34.103057], [-117.7301553, 34.1021421], [-117.712313, 34.106128], [-117.7103941, 34.1069287]], [[-117.7103941, 34.1069287], [-117.706468, 34.107061], [-117.71376, 34.127773], [-117.71376, 34.127773], [-117.71376, 34.127773], [-117.71376, 34.127773], [-117.718033, 34.118387], [-117.7163543, 34.1183734], [-117.7153621, 34.1183494], [-117.718033, 34.118387], [-117.724298, 34.116698], [-117.7258054, 34.1166113], [-117.733133, 34.116757], [-117.733133, 34.116757], [-117.7111516, 34.1069425], [-117.7103941, 34.1069287]]];
 
 
@@ -71,39 +68,114 @@ export default class App extends React.Component {
             isStep2Active: false,
             numPeople: 1,
             currentMap: 0,
-            locationsRoutes: []
+            // temporary list to overwrite 
+            locationsRoutes: [[-117.7103941, 34.1069287]],
+            //TO DO: ADD LOADING Feature
+            // isLoading: true,
+            // error: null,
+            wide: window.innerWidth > critWidth,
         };
     }
 
     // Use: upload .csv file to flask/python for further analysis
     // Taken from Stack Overflow
     uploadFile(e) {
-      var config = { headers: {'Content-Type': undefined} };
-
       e.preventDefault();
       let file = e.target.files[0];
       const formData = new FormData();
 
       formData.append("file", file);
-
+      formData.append("numPeople", this.state.numPeople.toString());
+      
+    //   this.fetchRoute();
       var self = this;
       axios
         .post("/findRoutes", formData)
         .then(res => {
-            console.log("before");
+            console.log("here");
             console.log(res.data.actual);
-            console.log(res);
-            console.log("after");
+            const locations = res.data.actual;
             // update state and getting location routes from backend
-            self.setState({locationsRoutes: res.data.actual});
+            self.setState({locationsRoutes: locations});
             self.showStep2();
         })
         .catch(err => console.warn(err));
     }
 
+    // This allows the input field for the number of canvassers to change 
+    // and updates the state accordingly
+    changeNumCanvassers(e) {
+        e.preventDefault();
+        this.setState({numPeople: e.target.value})
+    }
+
+    changeCurrentMap(e, changer) {
+        e.preventDefault();
+        this.setState({currentMap: ((this.state.currentMap + changer) >= 0 ? this.state.currentMap + changer : 0)})
+    }
+
+    // This updates the routing algorithm when number of canvasser changes is applied
+    updateRoutes(e) {
+        const numCanvassers = {"numPeople": this.state.numPeople};
+
+        axios
+          .post("/numCanvassersChanged", numCanvassers)
+          .then(res => console.log(res))
+          .catch(err => console.warn(err));
+    }
+
+    // Show only Welcome component, hide others
+    showWelcome = () => {
+        this.setState({
+          isWelcomeActive: true,
+          isStep1Active: false,
+          isStep2Active: false
+        })
+    }
+
+    // Show only Step 1 component, hide others
+    showStep1 = () => {
+        this.setState({
+          isWelcomeActive: false,
+          isStep1Active: true,
+          isStep2Active: false
+        })
+    }
+
+    // Show only Step 2 component, hide others
+    showStep2 = () => {
+        this.setState({
+          isWelcomeActive: false,
+          isStep1Active: false,
+          isStep2Active: true
+        })
+    }
+
+    // Deal with narrow windows better
+
+    /**
+     * Calculate & Update state of new dimensions
+     */
+    updateDimensions() {
+      if (window.innerWidth > critWidth && !this.state.wide) {
+        this.setState({ wide: true});
+      } else if (this.state.wide && window.innerWidth < critWidth) {
+        this.setState({ wide: false});
+      }
+    }
+
+    /**
+     * Add event listener
+     */
+    componentDidMount() {
+      this.updateDimensions();
+      window.addEventListener("resize", this.updateDimensions.bind(this));
+    }
+
     render() {
         console.log("rendered")
         console.log(this.state.currentMap % this.state.locationsRoutes.length)
+        // const { isLoading, users, error } = this.state;
         return (
             <div className="App">
                 <PageHeader />
@@ -133,7 +205,7 @@ export default class App extends React.Component {
                                             id="file"
                                             class="inputfile"
                                             ref={(input) => { this.filesInput = input }}
-                                            onChange={e => { this.uploadFile(e) }}
+                                            onChange={e => { this.uploadFile(e); this.showStep2() }}
                                         />
                                         <label for="file">Choose a CSV file</label>
                                     </div>
@@ -153,22 +225,55 @@ export default class App extends React.Component {
 
                             {/* This is what you see after selected a CSV file */}
                             {/* conditional rendering */}
-                            {this.state.isStep2Active && this.state.locationsRoutes &&
+                            {this.state.isStep2Active && 
                                 <div className="step2">
+                                    <p> {this.state.locationsRoutes} </p>
                                     <button className="button-alt" onClick={this.showStep1}>Back</button>
                                     <Step2 />
 
                                     {/* Display Map  */}
                                     {/* TODO: Show locations  */}
                                     {/* TODO: Add Functionality to Add/Remove Addresses */}
-                                    <table className="App-header">
-                                        <tr className="App-row">
-                                            <th className="App-Sides" id="mapBox">
+                                    {/* When screen is wide side by side map and editor*/}
+                                    {this.state.wide &&
+                                        <table className="App-header">
+                                            <tr className="App-row">
+                                                <th className="App-Sides" id="mapBox">
+                                                    <Directions coordRoute={this.state.locationsRoutes[this.state.currentMap % this.state.locationsRoutes.length]}/>
+                                                    <div className="text"> Route: {this.state.currentMap % this.state.locationsRoutes.length + 1}</div>
+                                                    <button class="button" onClick={e => {this.changeCurrentMap(e, -1)}}>Previous</button>
+                                                    <button class="button" onClick={e => {this.changeCurrentMap(e, 1)}}>Next</button>
+                                                </th>
+                                                <th className="App-Sides">
+                                                    {/* Add ability to adjust more paramaters of route */}
+                                                    <div className="text">Add Address</div>
+                                                    <div className="text">Remove Address</div>
+                                                    <div className="text">Number Of Canvassers:</div>
+                                                    <div class="description">
+                                                        <input type="number"
+                                                            name="numCanvassers"
+                                                            id="numCanvassers"
+                                                            class="inputNum"
+                                                            value={this.state.numPeople}
+                                                            ref={(input) => { this.filesInput = input }}
+                                                            onChange={e => {this.changeNumCanvassers(e)}}>
+                                                        </input>
+                                                    </div>
+                                                    <button class="button" onClick={e => {this.updateRoutes(e)}}>Apply Changes</button>
+                                                </th>
+                                            </tr>
+                                        </table>
+                                    }
+                                    {/* When screen is narrow show map above editors */}
+                                    {!this.state.wide && 
+                                        <div>
+                                            <div>
                                                 <Directions coordRoute={this.state.locationsRoutes[this.state.currentMap % this.state.locationsRoutes.length]}/>
-                                                <button class="button" onClick={e => {this.changeCurrentMap(e)}}>Next Route</button>
-                                            </th>
-                                            <th className="App-Sides">
-                                                {/* Add ability to adjust more paramaters of route */}
+                                                <div className="text"> Route: {this.state.currentMap % this.state.locationsRoutes.length + 1}</div>
+                                                <button class="button" onClick={e => {this.changeCurrentMap(e, -1)}}>Previous</button>
+                                                <button class="button" onClick={e => {this.changeCurrentMap(e, 1)}}>Next</button>
+                                            </div>
+                                            <div>
                                                 <div className="text">Add Address</div>
                                                 <div className="text">Remove Address</div>
                                                 <div className="text">Number Of Canvassers:</div>
@@ -183,9 +288,9 @@ export default class App extends React.Component {
                                                     </input>
                                                 </div>
                                                 <button class="button" onClick={e => {this.updateRoutes(e)}}>Apply Changes</button>
-                                            </th>
-                                        </tr>
-                                    </table>
+                                            </div>
+                                        </div>
+                                    }
                                 </div>
                             }
 
@@ -200,6 +305,3 @@ export default class App extends React.Component {
     }
 }
 
-export default GoogleApiWrapper({
-    apiKey: 'AIzaSyCOhukeA-4msXp_y45e1ZekcXC-oPP2y9I'
-  })(App);
