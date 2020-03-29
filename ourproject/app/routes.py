@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, jsonify
 from app import app
 import csv, io, requests, json, sys
 
@@ -27,16 +27,33 @@ def findRoutes():
         # Convert array of places to distance matrix, array of invalid places
         distances, errors = parseInput(placesList)
 
+        maxRouteTime, actualRoutes, routeTimes = getOutput(distances, GetLocations.coords, numPeople, sys.maxsize)
+        # TO DO: send flask to react
+        return jsonify({"actual":[[actualRoutes]], "routeTimes": routeTimes})
+        # print(actualRoutes)
+        # print(routeTimes)
+    return render_template("index.html")
+    # return jsonify()
+
+@app.route('/numCanvassersChanged', methods = ['POST'])
+def numCanvassersChanged():
+    if request.method == 'POST':
+        # get the new number of people from the input field
+        numPeople = int(request.get_json()['numPeople'])
+        print("")
+        print(numPeople)
+        print("")
+
+        # use the saved locations
         # algorithm assumes starting and ending at first location
         # routeTimes returned in seconds
         # Find solution to Vehicle Routing Problem
-        maxRouteTime, actualRoutes, routeTimes = getOutput(distances, placesList, numPeople, sys.maxsize)
-        print(maxRouteTime)
-        print(actualRoutes)
-        print(routeTimes)
 
-        # For Testing
-        print (', '.join(errors))
+        maxRouteTime, actualRoutes, routeTimes = getOutput(GetLocations.distances, GetLocations.coords, numPeople, sys.maxsize)
+        # TO DO: send flask to react
+        # print(actualRoutes)
+        # print(routeTimes)
+        return jsonify({"actual":[[actualRoutes]], "routeTimes": routeTimes})
     return render_template("index.html")
 
 
