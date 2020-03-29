@@ -3,10 +3,12 @@ import axios from 'axios';
 import './App.css';
 import Directions from "./components/Directions/DirectionsIndex";
 import PageHeader from './pageHeader'
+import { withState } from 'recompose';
 
 // This is the width at which the screen with the map switches between side by side and vertical organization.
 const critWidth = 1000;
-const locationsRoutes = [[[-117.7103941, 34.1069287], [-117.709978, 34.124954], [-117.709978, 34.124954], [-117.709978, 34.124954], [-117.709978, 34.124954], [-117.7326799, 34.1029753], [-117.732929, 34.103057], [-117.732929, 34.103057], [-117.7301553, 34.1021421], [-117.712313, 34.106128], [-117.7103941, 34.1069287]], [[-117.7103941, 34.1069287], [-117.706468, 34.107061], [-117.71376, 34.127773], [-117.71376, 34.127773], [-117.71376, 34.127773], [-117.71376, 34.127773], [-117.718033, 34.118387], [-117.7163543, 34.1183734], [-117.7153621, 34.1183494], [-117.718033, 34.118387], [-117.724298, 34.116698], [-117.7258054, 34.1166113], [-117.733133, 34.116757], [-117.733133, 34.116757], [-117.7111516, 34.1069425], [-117.7103941, 34.1069287]]];
+// const locationsRoutes = [[[-117.7103941, 34.1069287], [-117.709978, 34.124954], [-117.709978, 34.124954], [-117.709978, 34.124954], [-117.709978, 34.124954], [-117.7326799, 34.1029753], [-117.732929, 34.103057], [-117.732929, 34.103057], [-117.7301553, 34.1021421], [-117.712313, 34.106128], [-117.7103941, 34.1069287]], [[-117.7103941, 34.1069287], [-117.706468, 34.107061], [-117.71376, 34.127773], [-117.71376, 34.127773], [-117.71376, 34.127773], [-117.71376, 34.127773], [-117.718033, 34.118387], [-117.7163543, 34.1183734], [-117.7153621, 34.1183494], [-117.718033, 34.118387], [-117.724298, 34.116698], [-117.7258054, 34.1166113], [-117.733133, 34.116757], [-117.733133, 34.116757], [-117.7111516, 34.1069425], [-117.7103941, 34.1069287]]];
+
 
 // Display our introductory text (w/ styling)
 function Welcome() {
@@ -66,6 +68,11 @@ export default class App extends React.Component {
             isStep2Active: false,
             numPeople: 1,
             currentMap: 0,
+            // temporary list to overwrite 
+            locationsRoutes: [[-117.7103941, 34.1069287]],
+            //TO DO: ADD LOADING Feature
+            // isLoading: true,
+            // error: null,
             wide: window.innerWidth > critWidth,
         };
     }
@@ -78,11 +85,20 @@ export default class App extends React.Component {
       const formData = new FormData();
 
       formData.append("file", file);
-      formData.append("numPeople", this.state.numPeople.toString())
-
+      formData.append("numPeople", this.state.numPeople.toString());
+      
+    //   this.fetchRoute();
+      var self = this;
       axios
         .post("/findRoutes", formData)
-        .then(res => console.log(res))
+        .then(res => {
+            console.log("here");
+            console.log(res.data.actual);
+            const locations = res.data.actual;
+            // update state and getting location routes from backend
+            self.setState({locationsRoutes: locations});
+            self.showStep2();
+        })
         .catch(err => console.warn(err));
     }
 
@@ -158,7 +174,8 @@ export default class App extends React.Component {
 
     render() {
         console.log("rendered")
-        console.log(this.state.currentMap % locationsRoutes.length)
+        console.log(this.state.currentMap % this.state.locationsRoutes.length)
+        // const { isLoading, users, error } = this.state;
         return (
             <div className="App">
                 <PageHeader />
@@ -207,8 +224,10 @@ export default class App extends React.Component {
                             }
 
                             {/* This is what you see after selected a CSV file */}
-                            {this.state.isStep2Active &&
+                            {/* conditional rendering */}
+                            {this.state.isStep2Active && 
                                 <div className="step2">
+                                    <p> {this.state.locationsRoutes} </p>
                                     <button className="button-alt" onClick={this.showStep1}>Back</button>
                                     <Step2 />
 
@@ -220,8 +239,8 @@ export default class App extends React.Component {
                                         <table className="App-header">
                                             <tr className="App-row">
                                                 <th className="App-Sides" id="mapBox">
-                                                    <Directions coordRoute={locationsRoutes[this.state.currentMap % locationsRoutes.length]}/>
-                                                    <div className="text"> Route: {this.state.currentMap % locationsRoutes.length + 1}</div>
+                                                    <Directions coordRoute={this.state.locationsRoutes[this.state.currentMap % this.state.locationsRoutes.length]}/>
+                                                    <div className="text"> Route: {this.state.currentMap % this.state.locationsRoutes.length + 1}</div>
                                                     <button class="button" onClick={e => {this.changeCurrentMap(e, -1)}}>Previous</button>
                                                     <button class="button" onClick={e => {this.changeCurrentMap(e, 1)}}>Next</button>
                                                 </th>
@@ -249,8 +268,8 @@ export default class App extends React.Component {
                                     {!this.state.wide && 
                                         <div>
                                             <div>
-                                                <Directions coordRoute={locationsRoutes[this.state.currentMap % locationsRoutes.length]}/>
-                                                <div className="text"> Route: {this.state.currentMap % locationsRoutes.length + 1}</div>
+                                                <Directions coordRoute={this.state.locationsRoutes[this.state.currentMap % this.state.locationsRoutes.length]}/>
+                                                <div className="text"> Route: {this.state.currentMap % this.state.locationsRoutes.length + 1}</div>
                                                 <button class="button" onClick={e => {this.changeCurrentMap(e, -1)}}>Previous</button>
                                                 <button class="button" onClick={e => {this.changeCurrentMap(e, 1)}}>Next</button>
                                             </div>

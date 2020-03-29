@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, jsonify
 from app import app
 from .config import GetLocations
 import csv, io, requests, json, sys
@@ -38,6 +38,7 @@ def findRoutes():
         # TO DO: send flask to react
         print(actualRoutes)
         print(routeTimes)
+        return jsonify({"actual":[[actualRoutes]], "routeTimes": routeTimes})
     return render_template("index.html")
 
 @app.route('/numCanvassersChanged', methods = ['POST'])
@@ -58,6 +59,7 @@ def numCanvassersChanged():
         # TO DO: send flask to react
         print(actualRoutes)
         print(routeTimes)
+        return jsonify({"actual":[[actualRoutes]], "routeTimes": routeTimes})
     return render_template("index.html")
 
 
