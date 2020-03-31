@@ -181,8 +181,6 @@ export default class App extends React.Component {
         return (
                 
             <div className="App">
-                {/* Add Sidebar */}
-                <Sidebar />
                 <PageHeader />
                 <html>
                     <div className="page">
