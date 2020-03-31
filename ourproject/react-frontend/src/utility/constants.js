@@ -69,3 +69,4 @@ const convertTolatLng = (latLng, title) => {
     Porbandar: convertTolatLng("21.637215, 69.628066", "Porbandar"),
     Srinagar: convertTolatLng("34.076263, 74.800088", "Srinagar")
   };
+
