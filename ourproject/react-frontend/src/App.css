@@ -145,6 +145,25 @@ input[type=number]:hover::-webkit-inner-spin-button {
   position: relative !important;
 }
 
+.App-CSV-Upload {
+  color: blue;
+  width: 50vw;
+  position: relative;
+}
+
+.App-Sides {
+  width: 50vw;
+  vertical-align: top;
+}
+
+.Button-Container {
+  padding: 15px;
+}
+
+#mapBox div:first-child {
+  position: relative !important;
+}
+
 @keyframes App-logo-spin {
   from {
     transform: rotate(0deg);

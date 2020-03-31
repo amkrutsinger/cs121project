@@ -4,6 +4,7 @@ import './App.css';
 import Directions from "./components/Directions/DirectionsIndex";
 import PageHeader from './pageHeader'
 import { withState } from 'recompose';
+import Sidebar from "./Sidebar";
 
 // This is the width at which the screen with the map switches between side by side and vertical organization.
 const critWidth = 1000;
@@ -87,7 +88,6 @@ export default class App extends React.Component {
       formData.append("file", file);
       formData.append("numPeople", this.state.numPeople.toString());
       
-    //   this.fetchRoute();
       var self = this;
       axios
         .post("/findRoutes", formData)
@@ -177,6 +177,7 @@ export default class App extends React.Component {
         console.log(this.state.currentMap % this.state.locationsRoutes.length)
         // const { isLoading, users, error } = this.state;
         return (
+                
             <div className="App">
                 <PageHeader />
                 <html>
@@ -191,6 +192,112 @@ export default class App extends React.Component {
                                     <button className="button" onClick={this.showStep1}>Get Started!</button>
                                 </div>
                             }
+
+                            {/* This is what you see after clicking the "Get Started" button */}
+                            {this.state.isStep1Active &&
+                                <div className="step1">
+                                    <button className="button-alt" onClick={this.showWelcome}>Back</button>
+                                    <Step1 />
+                                    <div className="Button-Container">
+                                        {/* Input File Button */}
+                                        <input
+                                            type="file"
+                                            name="file"
+                                            id="file"
+                                            class="inputfile"
+                                            ref={(input) => { this.filesInput = input }}
+                                            onChange={e => { this.uploadFile(e); this.showStep2() }}
+                                        />
+                                        <label for="file">Choose a CSV file</label>
+                                    </div>
+                                    <p className ="text"> How many canvassers do you have? </p>
+                                    <div>
+                                        <input type="number"
+                                                        name="numCanvassers"
+                                                        id="numCanvassers"
+                                                        class="inputNum"
+                                                        value={this.state.numPeople}
+                                                        ref={(input) => { this.filesInput = input }}
+                                                        onChange={e => {this.changeNumCanvassers(e)}}>
+                                        </input>
+                                    </div>
+                                </div>
+                            }
+
+                            {/* This is what you see after selected a CSV file */}
+                            {/* conditional rendering ?*/}
+                            {this.state.isStep2Active && 
+                                <div className="step2">
+                                    <p> {this.state.locationsRoutes} </p>
+                                    <button className="button-alt" onClick={this.showStep1}>Back</button>
+                                    <Step2 />
+
+                                    {/* Display Map  */}
+                                    {/* TODO: Show locations  */}
+                                    {/* TODO: Add Functionality to Add/Remove Addresses */}
+                                    {/* When screen is wide side by side map and editor*/}
+                                    {this.state.wide &&
+                                        <table className="App-header">
+                                            <tr className="App-row">
+                                                <th className="App-Sides" id="mapBox">
+                                                    <Directions coordRoute={this.state.locationsRoutes[this.state.currentMap % this.state.locationsRoutes.length]}/>
+                                                    <div className="text"> Route: {this.state.currentMap % this.state.locationsRoutes.length + 1}</div>
+                                                    <button class="button" onClick={e => {this.changeCurrentMap(e, -1)}}>Previous</button>
+                                                    <button class="button" onClick={e => {this.changeCurrentMap(e, 1)}}>Next</button>
+                                                </th>
+                                                <th className="App-Sides">
+                                                    {/* Add ability to adjust more paramaters of route */}
+                                                    <div className="text">Add Address</div>
+                                                    <div className="text">Remove Address</div>
+                                                    <div className="text">Number Of Canvassers:</div>
+                                                    <div class="description">
+                                                        <input type="number"
+                                                            name="numCanvassers"
+                                                            id="numCanvassers"
+                                                            class="inputNum"
+                                                            value={this.state.numPeople}
+                                                            ref={(input) => { this.filesInput = input }}
+                                                            onChange={e => {this.changeNumCanvassers(e)}}>
+                                                        </input>
+                                                    </div>
+                                                    <button class="button" onClick={e => {this.updateRoutes(e)}}>Apply Changes</button>
+                                                </th>
+                                            </tr>
+                                        </table>
+                                    }
+                                    {/* When screen is narrow show map above editors */}
+                                    {!this.state.wide && 
+                                        <div>
+                                            <div>
+                                                <Directions coordRoute={this.state.locationsRoutes[this.state.currentMap % this.state.locationsRoutes.length]}/>
+                                                <div className="text"> Route: {this.state.currentMap % this.state.locationsRoutes.length + 1}</div>
+                                                <button class="button" onClick={e => {this.changeCurrentMap(e, -1)}}>Previous</button>
+                                                <button class="button" onClick={e => {this.changeCurrentMap(e, 1)}}>Next</button>
+                                            </div>
+                                            <div>
+                                                <div className="text">Add Address</div>
+                                                <div className="text">Remove Address</div>
+                                                <div className="text">Number Of Canvassers:</div>
+                                                <div class="description">
+                                                    <input type="number"
+                                                        name="numCanvassers"
+                                                        id="numCanvassers"
+                                                        class="inputNum"
+                                                        value={this.state.numPeople}
+                                                        ref={(input) => { this.filesInput = input }}
+                                                        onChange={e => {this.changeNumCanvassers(e)}}>
+                                                    </input>
+                                                </div>
+                                                <button class="button" onClick={e => {this.updateRoutes(e)}}>Apply Changes</button>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            }
+
+                            {/* Add section to display route */}
+                            {/* When adding code, move as much as possible to outside functions to avoid clutter */}
+
 
                             {/* This is what you see after clicking the "Get Started" button */}
                             {this.state.isStep1Active &&
@@ -296,7 +403,6 @@ export default class App extends React.Component {
 
                             {/* Add section to display route */}
                             {/* When adding code, move as much as possible to outside functions to avoid clutter */}
-
                         </div>
                     </div>
                 </html>

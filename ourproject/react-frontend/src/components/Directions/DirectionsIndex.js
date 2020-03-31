@@ -18,8 +18,8 @@ class Directions extends Component {
     defaultZoom: 12,
     map: null,
     center: {
-      lat: this.props.coordRoute[0][1], // [0][1] first location, second coord is latitude
-      lng: this.props.coordRoute[0][0]  // [0][0] first location, first coord is longitude
+      lat: this.props.coordRoute ? this.props.coordRoute[0][1]: 5, // [0][1] first location, second coord is latitude
+      lng: this.props.coordRoute? this.props.coordRoute[0][0]: 5  // [0][0] first location, first coord is longitude
     }
   };
   render() {

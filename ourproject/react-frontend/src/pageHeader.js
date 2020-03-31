@@ -1,6 +1,7 @@
 import React from 'react'
 import './pageHeader.css'
 import logo from './logo.png';
+import Sidebar from "./Sidebar";
 
 // Display our PageHeader - This includes
 //  -- upper left icon
@@ -18,6 +19,10 @@ function PageHeader() {
             <h1 className="Title">G R A S S R O U T E S</h1>
             <h2 className="Subtitle">Intelligent Mapping for Political Campaigns</h2>
         </header>
+        {/* <div>
+            <Sidebar />
+        </div> */}
+
     </div>
  )
 }
