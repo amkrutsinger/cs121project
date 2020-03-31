@@ -4,6 +4,7 @@ import './App.css';
 import Directions from "./components/Directions/DirectionsIndex";
 import PageHeader from './pageHeader'
 import { withState } from 'recompose';
+import Sidebar from "./Sidebar";
 
 // This is the width at which the screen with the map switches between side by side and vertical organization.
 const critWidth = 1000;
@@ -58,6 +59,7 @@ export default class App extends React.Component {
     // "How it Works" - Explain algorithm, steps to use step, credit sources
     // "About Us" - Explain that we are HMC students working on a school project
 
+    
     // Initialize states (what parts are visible)
     constructor(props) {
         super(props);
@@ -87,7 +89,7 @@ export default class App extends React.Component {
       formData.append("file", file);
       formData.append("numPeople", this.state.numPeople.toString());
       
-    //   this.fetchRoute();
+    //this.fetchRoute();
       var self = this;
       axios
         .post("/findRoutes", formData)
@@ -177,7 +179,10 @@ export default class App extends React.Component {
         console.log(this.state.currentMap % this.state.locationsRoutes.length)
         // const { isLoading, users, error } = this.state;
         return (
+                
             <div className="App">
+                {/* Add Sidebar */}
+                <Sidebar />
                 <PageHeader />
                 <html>
                     <div className="page">
@@ -224,7 +229,7 @@ export default class App extends React.Component {
                             }
 
                             {/* This is what you see after selected a CSV file */}
-                            {/* conditional rendering */}
+                            {/* conditional rendering ?*/}
                             {this.state.isStep2Active && 
                                 <div className="step2">
                                     <p> {this.state.locationsRoutes} </p>
