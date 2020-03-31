@@ -48,17 +48,25 @@ class Sidebar extends Component {
     this.onMouseClick = this.onMouseClick.bind(this);
   }
     
-  // logic behind toggling menu
+  /*
+  * Update whether sidebar is visible or not
+  */ 
   toggleMenu() {
     this.setState({
       visible: !this.state.visible
     });
   }
 
+  /*
+  * Determine if mouse has been clicked
+  */
   componentDidMount() {
     document.addEventListener('click', this.onMouseClick, false);
   }
 
+  /*
+  * Determine if mouse has been unclicked
+  */
   componentWillUnmount() {
     document.removeEventListener('click', this.onMouseClick, false);
   }
