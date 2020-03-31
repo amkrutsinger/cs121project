@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import './App.css';
+import './Menu.css';
  
 class SideBarRoutes extends React.Component {
   constructor(props) {
@@ -13,7 +13,7 @@ class SideBarRoutes extends React.Component {
         text: 'How it Works',
         route: '',
       }, {
-        text: 'About Us',
+        text: 'AbouÅt Us',
         route: '',
       }]
     }
