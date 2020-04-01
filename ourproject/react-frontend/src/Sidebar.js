@@ -84,7 +84,12 @@ class Sidebar extends Component {
       <div ref="root">
         <div className="menuBar">
           <div className="hclicker" onClick={ this.toggleMenu }></div>
-          <div id="hmenu" className={ status }><span></span><span></span><span></span><span></span></div>
+          <div id="hmenu" className={ status }>
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
           {/* <div className="title">
             <span>{ this.props.title }</span>
           </div> */}
