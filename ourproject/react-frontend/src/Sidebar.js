@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import './Menu.css';
+import logo from './logo.png';
  
 class SideBarRoutes extends React.Component {
   constructor(props) {
@@ -8,26 +9,26 @@ class SideBarRoutes extends React.Component {
     this.state = {
       routes: [{
         text: 'Home',
-        route: '',
+        path: 'https://www.google.com',
       }, {
         text: 'How it Works',
-        route: '',
+        path: 'https://www.google.com',
       }, {
-        text: 'AbouÅt Us',
-        route: '',
+        text: 'About Us',
+        path: 'https://www.google.com',
       }]
     }
   }
   render() {
     // map each route to a particular target link
-    let routes = this.state.routes.map((route, i) => 
+    let routes = this.state.routes.map((path, i) => 
       <li ref={i + 1}>
-        <a href={routes.route} target="_blank">{routes.text}</a>
+        <a href={path.path} target="_blank">{path.text}</a>
       </li>
     );
 
     return (
-        <div className={this.props.menuStatus} id='menu'>
+        <div className={this.props.status} id='menu'>
           <ul>
             { routes }
           </ul>
@@ -37,9 +38,8 @@ class SideBarRoutes extends React.Component {
 }
 
 class Sidebar extends Component {
-  constructor(props, context) {
-    super(props, context); 
-
+  constructor(props) {
+    super(props); 
     this.state = {
         isVisible: false
     };
@@ -53,7 +53,7 @@ class Sidebar extends Component {
   */ 
   toggleMenu() {
     this.setState({
-      visible: !this.state.visible
+      isVisible: !this.state.isVisible
     });
   }
 
@@ -72,13 +72,13 @@ class Sidebar extends Component {
   }
 
   onMouseClick(e) {
-        this.toggleMenu();
-        console.log("clicked");
-        e.stopPropagation();
+    this.toggleMenu();
+    console.log("clicked");
+    e.stopPropagation();
   }
 
   render() {
-    let status = this.state.isVisible;
+    let status = this.state.isVisible ? 'isVisible': '';
 
     return (
       <div ref="root">
@@ -90,14 +90,18 @@ class Sidebar extends Component {
             <span></span>
             <span></span>
           </div>
-          {/* <div className="title">
-            <span>{ this.props.title }</span>
-          </div> */}
-        </div>
+          <div class="hasicon">
+            <img src={logo} alt="GrassRoutes" class="icon" />
+          </div>
+          <div className="PageHeader">
+              <div className="Title">G R A S S R O U T E S</div>
+              <div className="Subtitle">Intelligent Mapping for Political Campaigns</div>
+          </div>
+          </div>
         <SideBarRoutes status={ status }/>
       </div>
     )
   }
 }
- 
+
 export default Sidebar;
