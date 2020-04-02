@@ -74,7 +74,7 @@ class Sidebar extends Component {
   }
 
   onMouseClick(e) {
-    if (!this.refs.root.contains(e.target) && this.state.isVisible == true) {
+    if (!this.refs.pageHead.contains(e.target) && this.state.isVisible == true) {
       this.setState({ isVisible: false });
       console.log("clicked");
     }
@@ -84,7 +84,7 @@ class Sidebar extends Component {
     let status = this.state.isVisible ? 'isVisible': '';
 
     return (
-      <div ref="root">
+      <div ref="pageHead">
         <div className="menuBar">
           <div className="hclicker" onClick={ this.toggleMenu }></div>
           <div id="hmenu" className={ status }>
