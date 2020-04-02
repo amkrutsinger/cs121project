@@ -179,7 +179,7 @@ export default class App extends React.Component {
         return (
                 
             <div className="App">
-                <PageHeader />
+                <Sidebar />
                 <html>
                     <div className="page">
                         {/* Everything in this div will be displayed in the white box */}
