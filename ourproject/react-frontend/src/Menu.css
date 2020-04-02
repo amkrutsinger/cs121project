@@ -1,5 +1,5 @@
 body {
-  background-color:  #F2F2F2;
+  background-color: white;
   color: white;
   font-family: $helvetica;
   margin: 0;
@@ -8,7 +8,7 @@ body {
 
 .menuBar {
   display: block;
-  height: 60px;
+  height: 100px;
   background-color: blue;
   box-shadow: 2px 5px 5px 0 rgba(0, 0, 0, 0.12);
   text-align: center;
@@ -21,7 +21,7 @@ body {
   transform: translateX(-50%);
   font-weight: 300;
   font-size: 2em;
-  line-height: 60px;
+  line-height: px;
 }
 
 #hmenu {
@@ -33,6 +33,7 @@ body {
   cursor: pointer;
     & span {
       position: absolute;
+      height: 5px;
       width: 100%;
       vertical-align: middle;
       margin: 20px 0 0 15px;
@@ -48,7 +49,7 @@ body {
 
 .hclicker {
   content: "";
-  height: 48px;
+  height: 100vh;
   width: 55px;
   position: absolute;
   top: 8px;
@@ -74,7 +75,7 @@ body {
   & li {
     padding: 30px 0 20px 20px;
     font-size: 1.5em;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.14);
+    border-bottom: 1px solid black;
   }
 }
 
@@ -86,4 +87,3 @@ li a {
 #menu.isVisible {
   transform: none;
 }
-
