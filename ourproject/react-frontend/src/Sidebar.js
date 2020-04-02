@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import './Menu.css';
 import logo from './logo.png';
+import PageHeader from './pageHeader.js'
  
 class SideBarRoutes extends React.Component {
   constructor(props) {
@@ -51,7 +52,8 @@ class Sidebar extends Component {
   /*
   * Update whether sidebar is visible or not
   */ 
-  toggleMenu() {
+  toggleMenu(e) {
+    e.stopPropagation();
     this.setState({
       isVisible: !this.state.isVisible
     });
@@ -72,9 +74,10 @@ class Sidebar extends Component {
   }
 
   onMouseClick(e) {
-    this.toggleMenu();
-    console.log("clicked");
-    e.stopPropagation();
+    if (!this.refs.root.contains(e.target) && this.state.isVisible == true) {
+      this.setState({ isVisible: false });
+      console.log("clicked");
+    }
   }
 
   render() {
@@ -90,16 +93,10 @@ class Sidebar extends Component {
             <span></span>
             <span></span>
           </div>
-          <div class="hasicon">
-            <img src={logo} alt="GrassRoutes" class="icon" />
-          </div>
-          <div className="PageHeader">
-              <div className="Title">G R A S S R O U T E S</div>
-              <div className="Subtitle">Intelligent Mapping for Political Campaigns</div>
-          </div>
-          </div>
+        <PageHeader/>
         <SideBarRoutes status={ status }/>
       </div>
+    </div>
     )
   }
 }
