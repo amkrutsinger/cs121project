@@ -77,6 +77,7 @@ export default class App extends React.Component {
         };
     }
 
+
     // Use: upload .csv file to flask/python for further analysis
     // Taken from Stack Overflow
     uploadFile(e) {
@@ -177,11 +178,11 @@ export default class App extends React.Component {
         // const { isLoading, users, error } = this.state;
         return (
             <div className="App">
-                <Sidebar />
+                {/* <Sidebar/> */}
                 <html>
                     {/* TO DO: Fix overlay */}
-                    {/* if I put Sidebar here, the formatting looks funky... */}
-                    {/* <Sidebar/> */}
+                    {/* if I put Sidebar here, the formatting of each subsection looks funky... */}
+                    <Sidebar/>
                     <div className="page">
                         {/* Everything in this div will be displayed in the white box */}
                         <div className="container">
