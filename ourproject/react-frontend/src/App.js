@@ -179,6 +179,9 @@ export default class App extends React.Component {
             <div className="App">
                 <Sidebar />
                 <html>
+                    {/* TO DO: Fix overlay */}
+                    {/* if I put Sidebar here, the formatting looks funky... */}
+                    {/* <Sidebar/> */}
                     <div className="page">
                         {/* Everything in this div will be displayed in the white box */}
                         <div className="container">
