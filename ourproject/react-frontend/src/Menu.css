@@ -1,16 +1,7 @@
-body {
-  background-color: white;
-  color: white;
-  font-family: $helvetica;
-  margin: 0;
-  box-sizing: border-box;
-}
-
 .menuBar {
   display: block;
   height: 100px;
-  background-color: blue;
-  box-shadow: 2px 5px 5px 0 black;
+  box-shadow: 2px 5px 5px 0 grey;
   text-align: center;
 }
 
