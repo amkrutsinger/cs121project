@@ -85,7 +85,7 @@ class Sidebar extends Component {
 
     return (
       <div ref="pageHead">
-        <div className="menuBar">
+        <div className="menuBar"> 
           <div className="hclicker" onClick={ this.toggleMenu }></div>
           <div id="hmenu" className={ status }>
             <span></span>
@@ -93,9 +93,8 @@ class Sidebar extends Component {
             <span></span>
             <span></span>
           </div>
-        <PageHeader/>
-        <SideBarRoutes status={ status }/>
-      </div>
+        </div>
+      <SideBarRoutes status={ status }/>
     </div>
     )
   }
