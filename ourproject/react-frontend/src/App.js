@@ -178,11 +178,12 @@ export default class App extends React.Component {
         // const { isLoading, users, error } = this.state;
         return (
             <div className="App">
-                {/* <Sidebar/> */}
                 <html>
+                    <PageHeader/>
+                    <Sidebar/>
                     {/* TO DO: Fix overlay */}
                     {/* if I put Sidebar here, the formatting of each subsection looks funky... */}
-                    <Sidebar/>
+                    {/* <Sidebar/> */}
                     <div className="page">
                         {/* Everything in this div will be displayed in the white box */}
                         <div className="container">
