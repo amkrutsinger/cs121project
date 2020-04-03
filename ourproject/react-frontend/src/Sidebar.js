@@ -1,5 +1,7 @@
 import React, { Component } from "react";
 import './Menu.css';
+import logo from './logo.png';
+import PageHeader from './pageHeader.js'
  
 class SideBarRoutes extends React.Component {
   constructor(props) {
@@ -8,26 +10,26 @@ class SideBarRoutes extends React.Component {
     this.state = {
       routes: [{
         text: 'Home',
-        route: '',
+        path: 'https://www.google.com',
       }, {
         text: 'How it Works',
-        route: '',
+        path: 'https://www.google.com',
       }, {
-        text: 'AbouÅt Us',
-        route: '',
+        text: 'About Us',
+        path: 'https://www.google.com',
       }]
     }
   }
   render() {
     // map each route to a particular target link
-    let routes = this.state.routes.map((route, i) => 
+    let routes = this.state.routes.map((path, i) => 
       <li ref={i + 1}>
-        <a href={routes.route} target="_blank">{routes.text}</a>
+        <a href={path.path} target="_blank">{path.text}</a>
       </li>
     );
 
     return (
-        <div className={this.props.menuStatus} id='menu'>
+        <div className={this.props.status} id='menu'>
           <ul>
             { routes }
           </ul>
@@ -37,9 +39,8 @@ class SideBarRoutes extends React.Component {
 }
 
 class Sidebar extends Component {
-  constructor(props, context) {
-    super(props, context); 
-
+  constructor(props) {
+    super(props); 
     this.state = {
         isVisible: false
     };
@@ -48,43 +49,55 @@ class Sidebar extends Component {
     this.onMouseClick = this.onMouseClick.bind(this);
   }
     
-  // logic behind toggling menu
-  toggleMenu() {
+  /*
+  * Update whether sidebar is visible or not
+  */ 
+  toggleMenu(e) {
+    e.stopPropagation();
     this.setState({
-      visible: !this.state.visible
+      isVisible: !this.state.isVisible
     });
   }
 
+  /*
+  * Determine if mouse has been clicked
+  */
   componentDidMount() {
     document.addEventListener('click', this.onMouseClick, false);
   }
 
+  /*
+  * Determine if mouse has been unclicked
+  */
   componentWillUnmount() {
     document.removeEventListener('click', this.onMouseClick, false);
   }
 
   onMouseClick(e) {
-        this.toggleMenu();
-        console.log("clicked");
-        e.stopPropagation();
+    if (!this.refs.pageHead.contains(e.target) && this.state.isVisible == true) {
+      this.setState({ isVisible: false });
+      console.log("clicked");
+    }
   }
 
   render() {
-    let status = this.state.isVisible;
+    let status = this.state.isVisible ? 'isVisible': '';
 
     return (
-      <div ref="root">
-        <div className="menuBar">
+      <div ref="pageHead">
+        <div className="menuBar"> 
           <div className="hclicker" onClick={ this.toggleMenu }></div>
-          <div id="hmenu" className={ status }><span></span><span></span><span></span><span></span></div>
-          {/* <div className="title">
-            <span>{ this.props.title }</span>
-          </div> */}
+          <div id="hmenu" className={ status }>
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
         </div>
-        <SideBarRoutes status={ status }/>
-      </div>
+      <SideBarRoutes status={ status }/>
+    </div>
     )
   }
 }
- 
+
 export default Sidebar;
