@@ -69,7 +69,7 @@ export default class App extends React.Component {
             numPeople: 1,
             currentMap: 0,
             // temporary list to overwrite 
-            locationsRoutes: [[-117.7103941, 34.1069287]],
+            locationsRoutes: [[[-117.7103941, 34.1069287]]],
             //TO DO: ADD LOADING Feature
             // isLoading: true,
             // error: null,
