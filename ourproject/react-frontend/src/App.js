@@ -8,7 +8,7 @@ import Sidebar from "./Sidebar";
 
 // This is the width at which the screen with the map switches between side by side and vertical organization.
 const critWidth = 1000;
-// const locationsRoutes = [[[-117.7103941, 34.1069287], [-117.709978, 34.124954], [-117.709978, 34.124954], [-117.709978, 34.124954], [-117.709978, 34.124954], [-117.7326799, 34.1029753], [-117.732929, 34.103057], [-117.732929, 34.103057], [-117.7301553, 34.1021421], [-117.712313, 34.106128], [-117.7103941, 34.1069287]], [[-117.7103941, 34.1069287], [-117.706468, 34.107061], [-117.71376, 34.127773], [-117.71376, 34.127773], [-117.71376, 34.127773], [-117.71376, 34.127773], [-117.718033, 34.118387], [-117.7163543, 34.1183734], [-117.7153621, 34.1183494], [-117.718033, 34.118387], [-117.724298, 34.116698], [-117.7258054, 34.1166113], [-117.733133, 34.116757], [-117.733133, 34.116757], [-117.7111516, 34.1069425], [-117.7103941, 34.1069287]]];
+const locationsRoutes = [[[-117.7103941, 34.1069287], [-117.709978, 34.124954], [-117.709978, 34.124954], [-117.709978, 34.124954], [-117.709978, 34.124954], [-117.7326799, 34.1029753], [-117.732929, 34.103057], [-117.732929, 34.103057], [-117.7301553, 34.1021421], [-117.712313, 34.106128], [-117.7103941, 34.1069287]], [[-117.7103941, 34.1069287], [-117.706468, 34.107061], [-117.71376, 34.127773], [-117.71376, 34.127773], [-117.71376, 34.127773], [-117.71376, 34.127773], [-117.718033, 34.118387], [-117.7163543, 34.1183734], [-117.7153621, 34.1183494], [-117.718033, 34.118387], [-117.724298, 34.116698], [-117.7258054, 34.1166113], [-117.733133, 34.116757], [-117.733133, 34.116757], [-117.7111516, 34.1069425], [-117.7103941, 34.1069287]]];
 
 
 // Display our introductory text (w/ styling)
@@ -100,8 +100,6 @@ export default class App extends React.Component {
       axios
         .post("/findRoutes", formData)
         .then(res => {
-            console.log("here");
-            console.log(res.data.actual);
             const locations = res.data.actual;
             // update state and getting location routes from backend
             self.setState({locationsRoutes: locations});
@@ -124,6 +122,7 @@ export default class App extends React.Component {
 
     // This updates the routing algorithm when number of canvasser changes is applied
     updateRoutes(e) {
+        this.setState({locationsRoutes: "unset"})
         const numCanvassers = {"numPeople": this.state.numPeople};
 
         axios
@@ -146,7 +145,8 @@ export default class App extends React.Component {
         this.setState({
           isWelcomeActive: false,
           isStep1Active: true,
-          isStep2Active: false
+          isStep2Active: false,
+          locationsRoutes: "unset"
         })
     }
 
@@ -182,7 +182,7 @@ export default class App extends React.Component {
 
     render() {
         console.log("rendered")
-        alert(this.state.locationsRoutes)
+        console.log(this.state.locationsRoutes)
         // const { isLoading, users, error } = this.state;
         return (
             <div className="App">
@@ -256,8 +256,8 @@ export default class App extends React.Component {
                                                 <table className="App-header">
                                                     <tr className="App-row">
                                                         <th className="App-Sides" id="mapBox">
-                                                            <Directions coordRoute={this.state.locationsRoutes[0][this.state.currentMap % this.state.locationsRoutes.length]}/>
-                                                            <div className="text"> Route: {this.state.currentMap % this.state.locationsRoutes.length + 1}</div>
+                                                            <Directions coordRoute={this.state.locationsRoutes[0][0][this.state.currentMap % this.state.locationsRoutes[0][0].length]}/>
+                                                            <div className="text"> Route: {this.state.currentMap % this.state.locationsRoutes[0][0].length + 1}</div>
                                                             <button class="button" onClick={e => {this.changeCurrentMap(e, -1)}}>Previous</button>
                                                             <button class="button" onClick={e => {this.changeCurrentMap(e, 1)}}>Next</button>
                                                         </th>
@@ -285,8 +285,8 @@ export default class App extends React.Component {
                                             {!this.state.wide && 
                                                 <div>
                                                     <div>
-                                                        <Directions coordRoute={this.state.locationsRoutes[0][this.state.currentMap % this.state.locationsRoutes.length]}/>
-                                                        <div className="text"> Route: {this.state.currentMap % this.state.locationsRoutes.length + 1}</div>
+                                                        <Directions coordRoute={this.state.locationsRoutes[0][0][this.state.currentMap % this.state.locationsRoutes[0][0].length]}/>
+                                                        <div className="text"> Route: {this.state.currentMap % this.state.locationsRoutes[0][0].length + 1}</div>
                                                         <button class="button" onClick={e => {this.changeCurrentMap(e, -1)}}>Previous</button>
                                                         <button class="button" onClick={e => {this.changeCurrentMap(e, 1)}}>Next</button>
                                                     </div>
