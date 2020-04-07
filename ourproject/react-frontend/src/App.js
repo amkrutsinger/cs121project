@@ -51,6 +51,38 @@ function LoadingScreen() {
     )
 }
 
+function AboutUs() {
+    return (
+        <div className="description">
+            <p className="big-text"> About Us </p>
+            <p className ="text"> 
+                Here are the locations we got. Do you want to change anything? 
+            </p>
+        </div>
+    )
+}
+
+function HowItWorks() {
+    return (
+        <div className="description">
+            <p className="big-text"> How It Works </p>
+            <p className ="text"> 
+                The solution implemented uses Google’s OR-tools which is, “open source software for combinatorial optimization, which seeks to find the best solution to a problem out of a very large set of possible solutions.” We set up an OR-tool vehicle routing problem solver and tell it we want it to create some number of loops (paths for canvassers to travel) from our start location and to find a solution that minimizes the maximum cost (which in our case is time) anyone has to travel. Using the maximum cost of anyone’s path achieves both equitable distribution of labor amongst canvassers and efficiency of each path. 
+                
+                All possible cycles in the graph of perhaps very many nodes is a gigantic solution space, so we use OR-tools to search this space efficiently for a solution that minimizes the maximum travel time. We tell it first to search for the solution using the solution strategy, path cheapest arc. This means our algorithm first finds a solution by, “Starting from a route ‘start’ node, connect it to the node which produces the cheapest route segment, then extend the route by iterating on the last node added to the route.” Then it uses many of the complicated techniques developed in OR-tools to search the solution space for an optimal solution.
+
+                Our site works like this:
+                <p> 
+                    <li> Step 1: Upload CSV file </li>
+                    <li> Step 2: Add/Remove addresses </li>
+                    <li> Step 3: Set Parameters (e.g. number of campaigners) </li>
+                    <li> Result: display path, statistics </li>
+                </p>
+            </p>
+        </div>
+    )
+}
+
 export default class App extends React.Component {
 
     // Overview:
@@ -183,7 +215,6 @@ export default class App extends React.Component {
     render() {
         console.log("rendered")
         console.log(this.state.locationsRoutes)
-        // const { isLoading, users, error } = this.state;
         return (
             <div className="App">
                 <html>
