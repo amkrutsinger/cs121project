@@ -14,8 +14,8 @@ html {
 
 .container {
     justify-content: center;
-    padding: 50px;
-    margin: 75px;
+    padding: 5.7vw;
+    margin: 8.6vw;
     border-radius: 20px;
     background: rgb(255,255,255);
     border: 4px solid rgb(0,100,0);
@@ -24,9 +24,10 @@ html {
 
 .button {
     font: 20px montserrat, sans-serif;
-    padding: 10px;
-    padding-left: 15px;
-    padding-right: 15px;
+    margin: 4px;
+    padding: 8px;
+    padding-left: 12px;
+    padding-right: 12px;
     background: rgb(0,100,0);   /* dark green */
     color: rgb(144, 238, 144);  /* light green */
     border-radius: 10px;  /* curved edges */
@@ -75,6 +76,33 @@ html {
     cursor: pointer; /* "hand" cursor */
 }
 
+.inputNum {
+    font: 15px montserrat, sans-serif;
+    padding: 10px;
+    border-radius: 5px;
+    position: bottom;
+}
+
+input[type=number]::-webkit-inner-spin-button { 
+  -webkit-appearance: none;
+  cursor:pointer;
+  display:block;
+  width:8px;
+  color: #333;
+  text-align:center;
+  position:relative;
+}   
+
+input[type=number]:hover::-webkit-inner-spin-button { 
+  background: #eee url('http://i.stack.imgur.com/YYySO.png') no-repeat 50% 50%;  
+  width: 14px;
+  height: 14px;
+  padding: 4px;
+  position: relative;
+  right: 4px;
+  border-radius: 28px;
+}
+
 .App-logo {
   height: 40vmin;
   pointer-events: none;
@@ -84,17 +112,56 @@ html {
   table-layout: fixed;
   display: block;
   width: 100%;
-  height: 50vw;
+  height: 75%;
 }
 
 .App-row {
   display: block;
   width: 100%;
+  vertical-align: inherit;
+}
+
+.App-Map {
+  color: blue;
+  width: 50vw;
+}
+
+.App-CSV-Upload {
+  color: blue;
+  width: 50vw;
+  position: relative;
 }
 
 .App-Sides {
+  width: 50vw;
+  vertical-align: top;
+}
+
+.Button-Container {
+  padding: 15px;
+}
+
+#mapBox div:first-child {
+  position: relative !important;
+}
+
+.App-CSV-Upload {
   color: blue;
   width: 50vw;
+  position: relative;
+}
+
+.App-Sides {
+  width: 50vw;
+  vertical-align: top;
+}
+
+.Button-Container {
+  padding: 15px;
+}
+
+#mapBox div:first-child {
+  position: relative !important;
 }
 
 @keyframes App-logo-spin {
