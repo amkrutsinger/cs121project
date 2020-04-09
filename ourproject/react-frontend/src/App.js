@@ -4,7 +4,6 @@ import './App.css';
 import Directions from "./components/Directions/DirectionsIndex";
 import PageHeader from './pageHeader'
 import { withState } from 'recompose';
-import Sidebar from "./Sidebar";
 
 // This is the width at which the screen with the map switches between side by side and vertical organization.
 const critWidth = 1000;
