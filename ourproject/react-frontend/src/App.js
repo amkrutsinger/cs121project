@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react';
+import React, {useState, useEffect} from 'react';
 import axios from 'axios';
 import './App.css';
 import Directions from "./components/Directions/DirectionsIndex";
@@ -11,38 +11,68 @@ const critWidth = 1000;
 const locationsRoutes = [[[-117.7103941, 34.1069287], [-117.709978, 34.124954], [-117.709978, 34.124954], [-117.709978, 34.124954], [-117.709978, 34.124954], [-117.7326799, 34.1029753], [-117.732929, 34.103057], [-117.732929, 34.103057], [-117.7301553, 34.1021421], [-117.712313, 34.106128], [-117.7103941, 34.1069287]], [[-117.7103941, 34.1069287], [-117.706468, 34.107061], [-117.71376, 34.127773], [-117.71376, 34.127773], [-117.71376, 34.127773], [-117.71376, 34.127773], [-117.718033, 34.118387], [-117.7163543, 34.1183734], [-117.7153621, 34.1183494], [-117.718033, 34.118387], [-117.724298, 34.116698], [-117.7258054, 34.1166113], [-117.733133, 34.116757], [-117.733133, 34.116757], [-117.7111516, 34.1069425], [-117.7103941, 34.1069287]]];
 
 
-// Display our introductory text (w/ styling)
-function Welcome() {
+/** TITLE AND BODY TEXT FOR PAGES **/
+
+// Text for Home Page
+const homeTitle = 'Welcome,'
+const homeBody = 'We understand that planning routes for volunteers to canvas is a difficult and time-consuming task. As such, we have created this site to help with all your canvasing needs. Using state-of-the-art algorithms techniques, we can plan an efficient route for your volunteers to visit all canvassing locations in just a few short minutes. Happy campaigning!'
+const homeButton = 'Get Started!'
+
+// Text for Upload CSV Page
+const uploadCSVTitle = 'Step 1'
+const uploadCSVBody = 'Where do you want to campaign?'
+
+// Text for Map Page
+const mapPageTitle = 'Step 2'
+const mapPageBody = 'Here are the locations we got. Do you want to change anything?'
+
+// Text for About Page
+const aboutTitle = 'About'
+const aboutBody = 'about stuff?'
+
+// Text for How It Works Page
+const howTitle = 'How It Works'
+const howBody = 'more stuf'
+
+
+/** FUNCTIONS TO DISPLAY TITLE AND BODY ON PAGES **/
+
+// A basic template to display text for pages on site
+function Template(title, body) {
     return (
         <div className="description">
-           <p className="big-text"> Welcome, </p>
-           <p className="text"> We understand that planning routes for volunteers to canvas is a difficult and time-consuming task. As such, we have created this site to help with all your canvasing needs. Using state-of-the-art algorithms techniques, we can plan an efficient route for your volunteers to visit all canvassing locations in just a few short minutes. Happy campaigning! </p>
-       </div>
+            <p className="big-text"> { title } </p>
+            <p className="text"> { body } </p>
+        </div>
     )
 }
 
+// The Home Page
+function Home() {
+    return Template(homeTitle, homeBody)
+}
 
-// Display instructions for step 1 of the process (uploading csv file)
+// Step 1 - Uploding the CSV file
 function Step1() {
-    return (
-        <div className="description">
-            <p className="big-text"> Step 1 </p>
-            <p className ="text"> Where do you want to campaign? </p>
-       </div>
-    )
+    return Template(uploadCSVTitle, uploadCSVBody)
 }
 
-
-// Display instructions for step 2 of the process (verifying addresses)
+// Step 2 - Verifying the Route
 function Step2() {
-    return (
-        <div className="description">
-            <p className="big-text"> Step 2 </p>
-            <p className ="text"> Here are the locations we got. Do you want to change anything? </p>
-       </div>
-    )
+    return Template(mapPageTitle, mapPageBody)
 }
 
+// The Home Page
+function About() {
+    return Template(aboutTitle, aboutBody)
+}
+
+// The Home Page
+function How() {
+    return Template(howTitle, howBody)
+}
+
+// A Loading Screen
 function LoadingScreen() {
     return (
         <div className="description">
@@ -50,6 +80,10 @@ function LoadingScreen() {
         </div>
     )
 }
+
+
+
+/** THE MAIN SITE DRIVER **/
 
 export default class App extends React.Component {
 
@@ -69,14 +103,14 @@ export default class App extends React.Component {
     // Initialize states (what parts are visible)
     constructor(props) {
         super(props);
-        this.state = 
+        this.state =
         {
-            isWelcomeActive: true,
-            isStep1Active: false,
-            isStep2Active: false,
+            // Used to keep track of current page displayed
+            page: "home",
+
             numPeople: 1,
             currentMap: 0,
-            // temporary list to overwrite 
+            // temporary list to overwrite
             locationsRoutes: "unset",
             //TO DO: ADD LOADING Feature
             // isLoading: true,
@@ -95,7 +129,7 @@ export default class App extends React.Component {
 
       formData.append("file", file);
       formData.append("numPeople", this.state.numPeople.toString());
-      
+
       var self = this;
       axios
         .post("/findRoutes", formData)
@@ -108,7 +142,7 @@ export default class App extends React.Component {
         .catch(err => console.warn(err));
     }
 
-    // This allows the input field for the number of canvassers to change 
+    // This allows the input field for the number of canvassers to change
     // and updates the state accordingly
     changeNumCanvassers(e) {
         e.preventDefault();
@@ -131,33 +165,6 @@ export default class App extends React.Component {
           .catch(err => console.warn(err));
     }
 
-    // Show only Welcome component, hide others
-    showWelcome = () => {
-        this.setState({
-          isWelcomeActive: true,
-          isStep1Active: false,
-          isStep2Active: false
-        })
-    }
-
-    // Show only Step 1 component, hide others
-    showStep1 = () => {
-        this.setState({
-          isWelcomeActive: false,
-          isStep1Active: true,
-          isStep2Active: false,
-          locationsRoutes: "unset"
-        })
-    }
-
-    // Show only Step 2 component, hide others
-    showStep2 = () => {
-        this.setState({
-          isWelcomeActive: false,
-          isStep1Active: false,
-          isStep2Active: true
-        })
-    }
 
     // Deal with narrow windows better
 
@@ -188,7 +195,15 @@ export default class App extends React.Component {
             <div className="App">
                 <html>
                     <PageHeader/>
-                    <Sidebar/>
+
+                    {/* Create a sidebar menu (manually) */}
+                    <div className="sidebar">
+                        <button className="button-side" onClick={() => {this.setState({page: "home"})}}> Home </button>
+                        <button className="button-side" onClick={() => {this.setState({page: "about"})}}> About Us </button>
+                        <button className="button-side" onClick={() => {this.setState({page: "how"})}}> How It Works </button>
+                    </div>
+
+
                     {/* TO DO: Fix overlay */}
                     {/* if I put Sidebar here, the formatting of each subsection looks funky... */}
                     {/* <Sidebar/> */}
@@ -196,16 +211,17 @@ export default class App extends React.Component {
                         {/* Everything in this div will be displayed in the white box */}
                         <div className="container">
                             {/* This is the initial message you see */}
-                            {this.state.isWelcomeActive &&
+                            {(this.state.page === "home") &&
                                 <div className="welcome">
-                                    <Welcome />
-                                    <button className="button" onClick={this.showStep1}>Get Started!</button>
+                                    <Home />
+                                    <button className="button" onClick={() => {this.setState({page: "step1"})}}> { homeButton } </button>
                                 </div>
                             }
+
                             {/* This is what you see after clicking the "Get Started" button */}
-                            {this.state.isStep1Active &&
+                            {(this.state.page === "step1") &&
                                 <div className="step1">
-                                    <button className="button-alt" onClick={this.showWelcome}>Back</button>
+                                    <button className="button-alt" onClick={() => {this.setState({page: "home"})}}>Back</button>
                                     <Step1 />
                                     <div className="Button-Container">
                                         {/* Input File Button */}
@@ -215,7 +231,7 @@ export default class App extends React.Component {
                                             id="file"
                                             class="inputfile"
                                             ref={(input) => { this.filesInput = input }}
-                                            onChange={e => { this.uploadFile(e); this.showStep2() }}
+                                            onChange={e => { this.uploadFile(e); this.setState({page: "step2"}) }}
                                         />
                                         <label for="file">Choose a CSV file</label>
                                     </div>
@@ -235,17 +251,17 @@ export default class App extends React.Component {
 
                             {/* This is what you see after selected a CSV file */}
                             {/* conditional rendering ?*/}
-                            {this.state.isStep2Active && 
+                            {(this.state.page === "step2") &&
                                 <div className="processingLocations">
-                                    {(this.state.locationsRoutes == "unset") && 
+                                    {(this.state.locationsRoutes == "unset") &&
                                         <div className="loading">
                                             <LoadingScreen></LoadingScreen>
                                         </div>
                                     }
-                                    {(this.state.locationsRoutes != "unset") && 
+                                    {(this.state.locationsRoutes != "unset") &&
                                         <div className="step2">
                                             <p> {this.state.locationsRoutes} </p>
-                                            <button className="button-alt" onClick={this.showStep1}>Back</button>
+                                            <button className="button-alt" onClick={() => {this.setState({page: "step1"})}}>Back</button>
                                             <Step2 />
 
                                             {/* Display Map  */}
@@ -282,7 +298,7 @@ export default class App extends React.Component {
                                                 </table>
                                             }
                                             {/* When screen is narrow show map above editors */}
-                                            {!this.state.wide && 
+                                            {!this.state.wide &&
                                                 <div>
                                                     <div>
                                                         <Directions coordRoute={this.state.locationsRoutes[0][0][this.state.currentMap % this.state.locationsRoutes[0][0].length]}/>
@@ -312,6 +328,21 @@ export default class App extends React.Component {
                                     }
                                 </div>
                             }
+
+                            {/* About Us Page */}
+                            {(this.state.page === "about") &&
+                                <div className="about">
+                                    <About />
+                                </div>
+                            }
+
+                            {/* How It Works Page */}
+                            {(this.state.page === "how") &&
+                                <div className="how">
+                                    <How />
+                                </div>
+                            }
+
                             {/* Add section to display route */}
                             {/* When adding code, move as much as possible to outside functions to avoid clutter */}
                         </div>
