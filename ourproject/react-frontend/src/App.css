@@ -51,6 +51,7 @@ html {
     color: rgb(144, 238, 144);  /* light green */
     border-radius: 10px;  /* curved edges */
     cursor: pointer; /* "hand" cursor */
+    text-decoration: none !important;
 }
 
 .button-alt {
