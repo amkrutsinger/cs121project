@@ -19,7 +19,7 @@ const homeButton = 'Get Started!'
 
 // Text for Upload CSV Page
 const uploadCSVTitle = 'Step 1'
-const uploadCSVBody = 'Where do you want to campaign?'
+const uploadCSVBody = 'Where do you want to campaign? \n Note: our algorithm assumes that all campaigners start at the first location listed'
 
 // Text for Map Page
 const mapPageTitle = 'Step 2'
@@ -202,10 +202,6 @@ export default class App extends React.Component {
                         <button className="button-side" onClick={() => {this.setState({page: "how"})}}> How It Works </button>
                     </div>
 
-
-                    {/* TO DO: Fix overlay */}
-                    {/* if I put Sidebar here, the formatting of each subsection looks funky... */}
-                    {/* <Sidebar/> */}
                     <div className="page">
                         {/* Everything in this div will be displayed in the white box */}
                         <div className="container">
