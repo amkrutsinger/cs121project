@@ -36,11 +36,11 @@ def findRoutes():
 
         maxRouteTime, actualRoutes, routeTimes = getOutput(distances, GetLocations.coords, numPeople, sys.maxsize)
         # TO DO: send flask to react
-        print(actualRoutes)
-        print(routeTimes)
+        # print(actualRoutes)
+        # print(routeTimes)
         routeUrls = getSharingURLS(actualRoutes, GetLocations.coords, GetLocations.placesList)
 
-        return jsonify({"actual":[[actualRoutes]], "routeTimes": routeTimes})
+        return jsonify({"actual":[[actualRoutes]], "routeTimes": routeTimes, "urls": [routeUrls]})
     return render_template("index.html")
 
 @app.route('/numCanvassersChanged', methods = ['POST'])

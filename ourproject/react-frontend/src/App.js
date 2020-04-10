@@ -4,6 +4,7 @@ import './App.css';
 import Directions from "./components/Directions/DirectionsIndex";
 import PageHeader from './pageHeader'
 import { withState } from 'recompose';
+import { CSVLink, CSVDownload } from "react-csv";
 
 // This is the width at which the screen with the map switches between side by side and vertical organization.
 const critWidth = 1000;
@@ -111,6 +112,7 @@ export default class App extends React.Component {
             currentMap: 0,
             // temporary list to overwrite
             locationsRoutes: "unset",
+            urls: "unset",
             //TO DO: ADD LOADING Feature
             // isLoading: true,
             // error: null,
@@ -134,9 +136,11 @@ export default class App extends React.Component {
         .post("/findRoutes", formData)
         .then(res => {
             const locations = res.data.actual;
+            const urls = res.data.urls;
             // update state and getting location routes from backend
             self.setState({locationsRoutes: locations});
-            self.showStep2();
+            self.setState({urls: urls});
+            //self.showStep2();
         })
         .catch(err => console.warn(err));
     }
@@ -256,6 +260,7 @@ export default class App extends React.Component {
                                     {(this.state.locationsRoutes != "unset") &&
                                         <div className="step2">
                                             <p> {this.state.locationsRoutes} </p>
+                                            <p> {this.state.urls} </p>
                                             <button className="button-alt" onClick={() => {this.setState({page: "step1"})}}>Back</button>
                                             <Step2 />
 
@@ -287,7 +292,8 @@ export default class App extends React.Component {
                                                                     onChange={e => {this.changeNumCanvassers(e)}}>
                                                                 </input>
                                                             </div>
-                                                            <button class="button" onClick={e => {this.updateRoutes(e)}}>Apply Changes</button>
+                                                            <div> <button class="button" onClick={e => {this.updateRoutes(e)}}>Apply Changes</button> </div>
+                                                            <CSVLink class="button" filename="your-routes.csv" data={this.state.urls}>Route Directions</CSVLink>
                                                         </th>
                                                     </tr>
                                                 </table>
@@ -315,7 +321,8 @@ export default class App extends React.Component {
                                                                 onChange={e => {this.changeNumCanvassers(e)}}>
                                                             </input>
                                                         </div>
-                                                        <button class="button" onClick={e => {this.updateRoutes(e)}}>Apply Changes</button>
+                                                        <div> <button class="button" onClick={e => {this.updateRoutes(e)}}>Apply Changes</button> </div>
+                                                        <CSVLink class="button" data={this.state.urls}>Route Directions</CSVLink>
                                                     </div>
                                                 </div>
                                             }
@@ -325,18 +332,10 @@ export default class App extends React.Component {
                             }
 
                             {/* About Us Page */}
-                            {(this.state.page === "about") &&
-                                <div className="about">
-                                    <About />
-                                </div>
-                            }
+                            {(this.state.page === "about") && <About /> }
 
                             {/* How It Works Page */}
-                            {(this.state.page === "how") &&
-                                <div className="how">
-                                    <How />
-                                </div>
-                            }
+                            {(this.state.page === "how") && <How /> }
 
                             {/* Add section to display route */}
                             {/* When adding code, move as much as possible to outside functions to avoid clutter */}
