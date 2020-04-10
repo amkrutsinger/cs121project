@@ -16,60 +16,37 @@ const locationsRoutes = [[[-117.7103941, 34.1069287], [-117.709978, 34.124954], 
 // Text for Home Page
 const homeTitle = 'Welcome,'
 const homeBody = 'We understand that planning routes for volunteers to canvas is a difficult and time-consuming task. As such, we have created this site to help with all your canvasing needs. Using state-of-the-art algorithms techniques, we can plan an efficient route for your volunteers to visit all canvassing locations in just a few short minutes. Happy campaigning!'
-const homeButton = 'Get Started!'
 
 // Text for Upload CSV Page
 const uploadCSVTitle = 'Step 1'
-const uploadCSVBody = 'Where do you want to campaign? \n Note: our algorithm assumes that all campaigners start at the first location listed'
+const uploadCSVBody = 'Where do you want to campaign?'
 
 // Text for Map Page
 const mapPageTitle = 'Step 2'
 const mapPageBody = 'Here are the locations we got. Do you want to change anything?'
 
 // Text for About Page
-const aboutTitle = 'About'
-const aboutBody = 'about stuff?'
+const aboutTitle = 'About Us'
+const aboutBody = 'Hello, we are Anna, Eric and Sophia. We made this site for our Software Development Project at Harvey Mudd College. We hope you enjoy it!'
 
 // Text for How It Works Page
 const howTitle = 'How It Works'
-const howBody = 'more stuf'
+const howBody = 'This site was created using OpenStreetRoute and GoogleMaps for the mapping services. To calculate the specific routes, we used an algorithm which approximates a solution to the Vehicle Routing Problem. If you want to learn more, the following paragraphs ellaborate on the exact method:'
+const howBody2 = 'The solution implemented uses Google’s OR-tools which is, “open source software for combinatorial optimization, which seeks to find the best solution to a problem out of a very large set of possible solutions.” We set up an OR-tool vehicle routing problem solver and tell it we want it to create some number of loops (paths for canvassers to travel) from our start location and to find a solution that minimizes the maximum cost (which in our case is time) anyone has to travel. Using the maximum cost of anyone’s path achieves both equitable distribution of labor amongst canvassers and efficiency of each path.'
+const howBody3 = 'All possible cycles in the graph of perhaps very many nodes is a gigantic solution space, so we use OR-tools to search this space efficiently for a solution that minimizes the maximum travel time. We tell it first to search for the solution using the solution strategy, path cheapest arc. This means our algorithm first finds a solution by, “Starting from a route ‘start’ node, connect it to the node which produces the cheapest route segment, then extend the route by iterating on the last node added to the route.” Then it uses many of the complicated techniques developed in OR-tools to search the solution space for an optimal solution.'
+const howBody4 = 'To understand all the techniques OR-tools uses to find the optimal solution would be a huge undertaking in itself so here’s an overview of the methods. OR-tools uses local search optimization which defines a neighborhood of local solutions, which likely means a set of solutions with only one or a few node changes in the path(s). It then tries to do what is called hill climbing which means to find the “best” solution in the local area and then repeat until a peak is found. This technique only finds a locally optimal solution which is not necessarily the one true best solution. There are techniques we could try that OR-tools has to not stop at locally optimal solutions, and keep searching to increase the likelihood of finding the global best, or true optimal but benefits are likely small and have large runtime increases.'
 
 
 /** FUNCTIONS TO DISPLAY TITLE AND BODY ON PAGES **/
 
-// A basic template to display text for pages on site
-function Template(title, body) {
+// A simple template to display text for pages on site
+function SimpleTemplate(props) {
     return (
         <div className="description">
-            <p className="big-text"> { title } </p>
-            <p className="text"> { body } </p>
+            <p className="big-text"> {props.title} </p>
+            <p className="text"> {props.body} </p>
         </div>
     )
-}
-
-// The Home Page
-function Home() {
-    return Template(homeTitle, homeBody)
-}
-
-// Step 1 - Uploding the CSV file
-function Step1() {
-    return Template(uploadCSVTitle, uploadCSVBody)
-}
-
-// Step 2 - Verifying the Route
-function Step2() {
-    return Template(mapPageTitle, mapPageBody)
-}
-
-// The Home Page
-function About() {
-    return Template(aboutTitle, aboutBody)
-}
-
-// The Home Page
-function How() {
-    return Template(howTitle, howBody)
 }
 
 // A Loading Screen
@@ -108,11 +85,17 @@ export default class App extends React.Component {
             // Used to keep track of current page displayed
             page: "home",
 
+            // Used to keep track of visited pages - last item is the most recently visited page
+            // (excluding the current one)
+            back: [],
+
             numPeople: 1,
             currentMap: 0,
+
             // temporary list to overwrite
             locationsRoutes: "unset",
             urls: "unset",
+
             //TO DO: ADD LOADING Feature
             // isLoading: true,
             // error: null,
@@ -135,12 +118,8 @@ export default class App extends React.Component {
       axios
         .post("/findRoutes", formData)
         .then(res => {
-            const locations = res.data.actual;
-            const urls = res.data.urls;
             // update state and getting location routes from backend
-            self.setState({locationsRoutes: locations});
-            self.setState({urls: urls});
-            //self.showStep2();
+            self.setState({locationsRoutes: res.data.actual, urls: res.data.urls});
         })
         .catch(err => console.warn(err));
     }
@@ -168,11 +147,23 @@ export default class App extends React.Component {
           .catch(err => console.warn(err));
     }
 
+    // Used for back button
+    // Sends user to latest page in back array and then updates back array to remove that value
+    goBack() {
+        let array = this.state.back.slice()   // make a separate copy of the array
+        let priorPage = array.splice(array.length - 1, 1)
+        this.setState({page: priorPage[0], back: array})
+    }
 
-    // Deal with narrow windows better
+    // Performs all functions necessary to change page displayed
+    // (updates page and back)
+    goToPage(newPage) {
+        this.setState({back: this.state.back.concat(this.state.page), page: newPage})
+    }
 
     /**
      * Calculate & Update state of new dimensions
+     * This helps to deal with narrow windows
      */
     updateDimensions() {
       if (window.innerWidth > critWidth && !this.state.wide) {
@@ -201,48 +192,69 @@ export default class App extends React.Component {
 
                     {/* Create a sidebar menu (manually) */}
                     <div className="sidebar">
-                        <button className="button-side" onClick={() => {this.setState({page: "home"})}}> Home </button>
-                        <button className="button-side" onClick={() => {this.setState({page: "about"})}}> About Us </button>
-                        <button className="button-side" onClick={() => {this.setState({page: "how"})}}> How It Works </button>
+                        <button className="button-side" onClick={() => {this.goToPage("home")}}> Home </button>
+                        <button className="button-side" onClick={() => {this.goToPage("about")}}> About Us </button>
+                        <button className="button-side" onClick={() => {this.goToPage("how")}}> How It Works </button>
                     </div>
 
                     <div className="page">
+
                         {/* Everything in this div will be displayed in the white box */}
                         <div className="container">
-                            {/* This is the initial message you see */}
+
+                            {/* A back button - when user has a page in their history */}
+                            {(this.state.back.length > 0) &&
+                                <button className="button-alt" onClick={() => {this.goBack()}}>Back</button>
+                            }
+
+                            {/* The Home Page */}
                             {(this.state.page === "home") &&
                                 <div className="welcome">
-                                    <Home />
-                                    <button className="button" onClick={() => {this.setState({page: "step1"})}}> { homeButton } </button>
+                                    <SimpleTemplate title={homeTitle} body={homeBody} />
+                                    <button className="button" onClick={() => {this.goToPage("step1")}}> Get Started! </button>
+                                </div>
+                            }
+
+                            {/* About Us Page */}
+                            {(this.state.page === "about") && <SimpleTemplate title={aboutTitle} body={aboutBody} /> }
+
+                            {/* How It Works Page */}
+                            {(this.state.page === "how") &&
+                                <div>
+                                    <SimpleTemplate title={howTitle} body={howBody} />
+                                    <p className="text"> {howBody2} </p>
+                                    <p className="text"> {howBody3} </p>
+                                    <p className="text"> {howBody4} </p>
                                 </div>
                             }
 
                             {/* This is what you see after clicking the "Get Started" button */}
                             {(this.state.page === "step1") &&
                                 <div className="step1">
-                                    <button className="button-alt" onClick={() => {this.setState({page: "home"})}}>Back</button>
-                                    <Step1 />
+                                    <SimpleTemplate title={uploadCSVTitle} body={uploadCSVBody} />
+
+                                    {/* Input File Button - For Uploading the CSV */}
                                     <div className="Button-Container">
-                                        {/* Input File Button */}
                                         <input
                                             type="file"
                                             name="file"
                                             id="file"
                                             class="inputfile"
                                             ref={(input) => { this.filesInput = input }}
-                                            onChange={e => { this.uploadFile(e); this.setState({page: "step2"}) }}
+                                            onChange={e => {this.uploadFile(e); this.goToPage("step2")}}
                                         />
                                         <label for="file">Choose a CSV file</label>
                                     </div>
+
                                     <p className ="text"> How many canvassers do you have? </p>
                                     <div>
                                         <input type="number"
-                                                        name="numCanvassers"
-                                                        id="numCanvassers"
-                                                        class="inputNum"
-                                                        value={this.state.numPeople}
-                                                        ref={(input) => { this.filesInput = input }}
-                                                        onChange={e => {this.changeNumCanvassers(e)}}>
+                                               name="numCanvassers"
+                                               id="numCanvassers"
+                                               class="inputNum"
+                                               value={this.state.numPeople}
+                                               ref={(input) => { this.filesInput = input }}
+                                               onChange={e => {this.changeNumCanvassers(e)}}>
                                         </input>
                                     </div>
                                 </div>
@@ -252,17 +264,17 @@ export default class App extends React.Component {
                             {/* conditional rendering ?*/}
                             {(this.state.page === "step2") &&
                                 <div className="processingLocations">
+                                    {/* The Loading Screen */}
                                     {(this.state.locationsRoutes == "unset") &&
                                         <div className="loading">
                                             <LoadingScreen></LoadingScreen>
                                         </div>
                                     }
+
                                     {(this.state.locationsRoutes != "unset") &&
                                         <div className="step2">
                                             <p> {this.state.locationsRoutes} </p>
-                                            <p> {this.state.urls} </p>
-                                            <button className="button-alt" onClick={() => {this.setState({page: "step1"})}}>Back</button>
-                                            <Step2 />
+                                            <SimpleTemplate title={mapPageTitle} body={mapPageBody} />
 
                                             {/* Display Map  */}
                                             {/* TODO: Show locations  */}
@@ -298,6 +310,7 @@ export default class App extends React.Component {
                                                     </tr>
                                                 </table>
                                             }
+
                                             {/* When screen is narrow show map above editors */}
                                             {!this.state.wide &&
                                                 <div>
@@ -322,7 +335,7 @@ export default class App extends React.Component {
                                                             </input>
                                                         </div>
                                                         <div> <button class="button" onClick={e => {this.updateRoutes(e)}}>Apply Changes</button> </div>
-                                                        <CSVLink class="button" data={this.state.urls}>Route Directions</CSVLink>
+                                                        <CSVLink class="button" filename="your-routes.csv" data={this.state.urls}>Route Directions</CSVLink>
                                                     </div>
                                                 </div>
                                             }
@@ -330,15 +343,6 @@ export default class App extends React.Component {
                                     }
                                 </div>
                             }
-
-                            {/* About Us Page */}
-                            {(this.state.page === "about") && <About /> }
-
-                            {/* How It Works Page */}
-                            {(this.state.page === "how") && <How /> }
-
-                            {/* Add section to display route */}
-                            {/* When adding code, move as much as possible to outside functions to avoid clutter */}
                         </div>
                     </div>
                 </html>
