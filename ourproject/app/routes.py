@@ -35,9 +35,7 @@ def findRoutes():
         # Find solution to Vehicle Routing Problem
 
         maxRouteTime, actualRoutes, routeTimes = getOutput(distances, GetLocations.coords, numPeople, sys.maxsize)
-        # TO DO: send flask to react
-        # print(actualRoutes)
-        # print(routeTimes)
+        
         routeUrls = getSharingURLS(actualRoutes, GetLocations.coords, GetLocations.placesList)
 
         return jsonify({"actual":[[actualRoutes]], "routeTimes": routeTimes, "urls": [routeUrls]})
@@ -45,12 +43,10 @@ def findRoutes():
 
 @app.route('/numCanvassersChanged', methods = ['POST'])
 def numCanvassersChanged():
+    print('recieved')
     if request.method == 'POST':
         # get the new number of people from the input field
         numPeople = int(request.get_json()['numPeople'])
-        print("")
-        print(numPeople)
-        print("")
 
         # use the saved locations
         # algorithm assumes starting and ending at first location
@@ -58,10 +54,8 @@ def numCanvassersChanged():
         # Find solution to Vehicle Routing Problem
 
         maxRouteTime, actualRoutes, routeTimes = getOutput(GetLocations.distances, GetLocations.coords, numPeople, sys.maxsize)
-        # TO DO: send flask to react
-        print(actualRoutes)
-        print(routeTimes)
-        return jsonify({"actual":[[actualRoutes]], "routeTimes": routeTimes})
+        routeUrls = getSharingURLS(actualRoutes, GetLocations.coords, GetLocations.placesList)
+        return jsonify({"actual":[[actualRoutes]], "routeTimes": routeTimes, "urls": [routeUrls]})
     return render_template("index.html")
 
 
