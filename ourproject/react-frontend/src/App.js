@@ -6,9 +6,11 @@ import PageHeader from './pageHeader'
 import { withState } from 'recompose';
 import { CSVLink, CSVDownload } from "react-csv";
 
+import loading from './loading.gif';
+
 // This is the width at which the screen with the map switches between side by side and vertical organization.
 const critWidth = 1000;
-const locationsRoutes = [[[-117.7103941, 34.1069287], [-117.709978, 34.124954], [-117.709978, 34.124954], [-117.709978, 34.124954], [-117.709978, 34.124954], [-117.7326799, 34.1029753], [-117.732929, 34.103057], [-117.732929, 34.103057], [-117.7301553, 34.1021421], [-117.712313, 34.106128], [-117.7103941, 34.1069287]], [[-117.7103941, 34.1069287], [-117.706468, 34.107061], [-117.71376, 34.127773], [-117.71376, 34.127773], [-117.71376, 34.127773], [-117.71376, 34.127773], [-117.718033, 34.118387], [-117.7163543, 34.1183734], [-117.7153621, 34.1183494], [-117.718033, 34.118387], [-117.724298, 34.116698], [-117.7258054, 34.1166113], [-117.733133, 34.116757], [-117.733133, 34.116757], [-117.7111516, 34.1069425], [-117.7103941, 34.1069287]]];
+// const locationsRoutes = [[[-117.7103941, 34.1069287], [-117.709978, 34.124954], [-117.709978, 34.124954], [-117.709978, 34.124954], [-117.709978, 34.124954], [-117.7326799, 34.1029753], [-117.732929, 34.103057], [-117.732929, 34.103057], [-117.7301553, 34.1021421], [-117.712313, 34.106128], [-117.7103941, 34.1069287]], [[-117.7103941, 34.1069287], [-117.706468, 34.107061], [-117.71376, 34.127773], [-117.71376, 34.127773], [-117.71376, 34.127773], [-117.71376, 34.127773], [-117.718033, 34.118387], [-117.7163543, 34.1183734], [-117.7153621, 34.1183494], [-117.718033, 34.118387], [-117.724298, 34.116698], [-117.7258054, 34.1166113], [-117.733133, 34.116757], [-117.733133, 34.116757], [-117.7111516, 34.1069425], [-117.7103941, 34.1069287]]];
 
 
 /** TITLE AND BODY TEXT FOR PAGES **/
@@ -54,10 +56,11 @@ function LoadingScreen() {
     return (
         <div className="description">
             <p className="big-text">LOADING...</p>
+                {/* added a loading gif */}
+                <img src={loading}></img>
         </div>
     )
 }
-
 
 
 /** THE MAIN SITE DRIVER **/
@@ -88,22 +91,19 @@ export default class App extends React.Component {
             // Used to keep track of visited pages - last item is the most recently visited page
             // (excluding the current one)
             back: [],
-
             numPeople: 1,
             currentMap: 0,
-
             // temporary list to overwrite
             locationsRoutes: "unset",
             urls: "unset",
-
             //TO DO: ADD LOADING Feature
-            // isLoading: true,
-            // error: null,
+            isLoading: undefined,
+            progress: 0,
             wide: window.innerWidth > critWidth,
         };
+        // this.boundHandleFetchRoute = this.handleFetchRoute.bind(this);
     }
-
-
+    
     // Use: upload .csv file to flask/python for further analysis
     // Taken from Stack Overflow
     uploadFile(e) {
@@ -115,11 +115,16 @@ export default class App extends React.Component {
       formData.append("numPeople", this.state.numPeople.toString());
 
       var self = this;
+      // for testing purposes
+      const time = window.performance.now();
       axios
         .post("/findRoutes", formData)
         .then(res => {
             // update state and getting location routes from backend
             self.setState({locationsRoutes: res.data.actual, urls: res.data.urls});
+            self.isLoading = false;
+            // for testing purposes, tells us how long request took
+            console.log(window.performance.now() - time);
         })
         .catch(err => console.warn(err));
     }
@@ -138,12 +143,14 @@ export default class App extends React.Component {
 
     // This updates the routing algorithm when number of canvasser changes is applied
     updateRoutes(e) {
-        this.setState({locationsRoutes: "unset"})
+        this.setState({locationsRoutes: 'unset'})
         const numCanvassers = {"numPeople": this.state.numPeople};
-
+        var self = this;
         axios
           .post("/numCanvassersChanged", numCanvassers)
-          .then(res => console.log(res))
+          .then(res => {
+                self.setState({locationsRoutes: res.data.actual, urls: res.data.urls});
+            })
           .catch(err => console.warn(err));
     }
 
@@ -184,6 +191,7 @@ export default class App extends React.Component {
     render() {
         console.log("rendered")
         console.log(this.state.locationsRoutes)
+        console.log(this.state.numPeople)
         return (
             <div className="App">
                 <html>
@@ -254,6 +262,7 @@ export default class App extends React.Component {
                                                value={this.state.numPeople}
                                                ref={(input) => { this.filesInput = input }}
                                                onChange={e => {this.changeNumCanvassers(e)}}>
+                                            {/* onChange={e => {this.changeNumCanvassers(e)}}> */}
                                         </input>
                                     </div>
                                 </div>
@@ -264,15 +273,13 @@ export default class App extends React.Component {
                             {(this.state.page === "step2") &&
                                 <div className="processingLocations">
                                     {/* The Loading Screen */}
-                                    {(this.state.locationsRoutes == "unset") &&
+                                    {(this.state.locationsRoutes == "unset" && !this.isLoading) &&
                                         <div className="loading">
                                             <LoadingScreen></LoadingScreen>
                                         </div>
                                     }
-
                                     {(this.state.locationsRoutes != "unset") &&
                                         <div className="step2">
-                                            <p> {this.state.locationsRoutes} </p>
                                             <SimpleTemplate title={mapPageTitle} body={mapPageBody} />
 
                                             {/* Display Map  */}
