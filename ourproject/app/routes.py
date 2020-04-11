@@ -36,9 +36,11 @@ def findRoutes():
 
         maxRouteTime, actualRoutes, routeTimes = getOutput(distances, GetLocations.coords, numPeople, sys.maxsize)
         # TO DO: send flask to react
-        print(actualRoutes)
-        print(routeTimes)
-        return jsonify({"actual":[[actualRoutes]], "routeTimes": routeTimes})
+        # print(actualRoutes)
+        # print(routeTimes)
+        routeUrls = getSharingURLS(actualRoutes, GetLocations.coords, GetLocations.placesList)
+
+        return jsonify({"actual":[[actualRoutes]], "routeTimes": routeTimes, "urls": [routeUrls]})
     return render_template("index.html")
 
 @app.route('/numCanvassersChanged', methods = ['POST'])
@@ -93,6 +95,23 @@ def getOutput(distances, placesList, numPeople, vehicleMaxDistance):
     maxRouteTime, routes, routeTimes = analyze_solution(data, manager, routing, solution)
     actualRoutes = [[placesList[location] for location in route] for route in routes]
     return maxRouteTime, actualRoutes, routeTimes
+
+
+# Input: a list of routes, a list of coords, and a list of places (where coords[0] is the
+#        coords of placesList[0])
+# Output: a list of urls to the google maps with the corresponding route displayed
+def getSharingURLS(routes, coords, places):
+    urlStart = 'google.com/maps/dir/'  # this is the starting string for all urls to google maps
+
+    routeUrls = []
+    for route in routes:
+        currUrl = urlStart
+        for coord in route:
+            # this converts the coords into the appropiate format for a url
+            currUrl += str(coord[1]) + ',+' + str(coord[0]) + '/'
+        routeUrls += [currUrl]
+    return routeUrls
+
 
 
 # --- OPEN ROUTE SERVICE FUNCTIONS --- #
@@ -238,4 +257,3 @@ def pathFinder(distances, numPeople, vehicleMaxDistance):
 
     # Return solution
     return data, manager, routing, solution
-

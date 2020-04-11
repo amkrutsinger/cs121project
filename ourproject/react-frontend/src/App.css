@@ -12,6 +12,25 @@ html {
   margin: 0;
 }
 
+.sidebar {
+    position: absolute;
+    top: 105px;
+    left: 10px;
+    justify-content: left;
+}
+
+.button-side {
+    font: 15px montserrat, sans-serif;
+    margin: 4px;
+    padding: 4px;
+    padding-left: 4px;
+    padding-right: 4px;
+    background: rgb(255,255,255);   /* dark green */
+    color: rgb(0,100,0);  /* light green */
+    border-radius: 5px;  /* curved edges */
+    cursor: pointer; /* "hand" cursor */
+}
+
 .container {
     justify-content: center;
     padding: 5.7vw;
@@ -32,6 +51,7 @@ html {
     color: rgb(144, 238, 144);  /* light green */
     border-radius: 10px;  /* curved edges */
     cursor: pointer; /* "hand" cursor */
+    text-decoration: none !important;
 }
 
 .button-alt {
@@ -83,7 +103,7 @@ html {
     position: bottom;
 }
 
-input[type=number]::-webkit-inner-spin-button { 
+input[type=number]::-webkit-inner-spin-button {
   -webkit-appearance: none;
   cursor:pointer;
   display:block;
@@ -91,10 +111,10 @@ input[type=number]::-webkit-inner-spin-button {
   color: #333;
   text-align:center;
   position:relative;
-}   
+}
 
-input[type=number]:hover::-webkit-inner-spin-button { 
-  background: #eee url('http://i.stack.imgur.com/YYySO.png') no-repeat 50% 50%;  
+input[type=number]:hover::-webkit-inner-spin-button {
+  background: #eee url('http://i.stack.imgur.com/YYySO.png') no-repeat 50% 50%;
   width: 14px;
   height: 14px;
   padding: 4px;
