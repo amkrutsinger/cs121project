@@ -184,7 +184,6 @@ export default class App extends React.Component {
     render() {
         console.log("rendered")
         console.log(this.state.locationsRoutes)
-        // const { isLoading, users, error } = this.state;
         return (
             <div className="App">
                 <html>
