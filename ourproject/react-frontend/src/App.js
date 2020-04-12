@@ -3,7 +3,7 @@ import axios from 'axios';
 import './App.css';
 import Directions from "./components/Directions/DirectionsIndex";
 import PageHeader from './pageHeader'
-import { withState } from 'recompose';
+import { withState, setDisplayName } from 'recompose';
 import { CSVLink, CSVDownload } from "react-csv";
 
 import loading from './loading.gif';
@@ -62,6 +62,30 @@ function LoadingScreen() {
     )
 }
 
+// function PrintAddresses(props) {
+//     return (
+//         <div className = "list">
+//             <ul>
+//             {props.addressList.map(function(item) {
+//                 return <li key={item}>{item}</li>;
+//             })}
+//             </ul>
+//         </div>
+//     )
+// }
+
+// function IdiomaticReactList(props) {
+//     return (
+//       <div>
+//         {props.items.map((item, index) => (
+//           <Item key={index} item={item} />
+//         ))}
+//       </div>
+//     );
+//   }
+  
+
+
 
 /** THE MAIN SITE DRIVER **/
 
@@ -91,19 +115,21 @@ export default class App extends React.Component {
             // Used to keep track of visited pages - last item is the most recently visited page
             // (excluding the current one)
             back: [],
-            numPeople: 1,
-            currentMap: 0,
+            isLoading: undefined,
+            addressIsVisible: undefined,
+            wide: window.innerWidth > critWidth,
+
             // temporary list to overwrite
             locationsRoutes: "unset",
             urls: "unset",
-            //TO DO: ADD LOADING Feature
-            isLoading: undefined,
-            progress: 0,
-            wide: window.innerWidth > critWidth,
+            numPeople: 1,
+            currentMap: 0,
+            addressList: undefined,
         };
+        // this.showAddresses = this.showAddresses.bind(this);
         // this.boundHandleFetchRoute = this.handleFetchRoute.bind(this);
     }
-    
+
     // Use: upload .csv file to flask/python for further analysis
     // Taken from Stack Overflow
     uploadFile(e) {
@@ -113,19 +139,30 @@ export default class App extends React.Component {
 
       formData.append("file", file);
       formData.append("numPeople", this.state.numPeople.toString());
-
+      
       var self = this;
       // for testing purposes
       const time = window.performance.now();
+      this.isLoading = true;
       axios
-        .post("/findRoutes", formData)
-        .then(res => {
+        .all([axios.post("/getAddresses", formData), axios.post("/findRoutes", formData)])
+        // .post("/findRoutes", formData)
+        .then(axios.spread(function (addresses, route) {
+        // .then(res => {
+            self.isLoading = true;
             // update state and getting location routes from backend
-            self.setState({locationsRoutes: res.data.actual, urls: res.data.urls});
+            let address = addresses.data;
+            let routes = route.data
+            self.setState({
+                addressList: address.placesList,
+                locationsRoutes: routes.actual, 
+                urls: routes.urls
+            })
+            // self.setState({locationsRoutes: res.data.actual, urls: res.data.urls, addressList: res.data.addressList})
             self.isLoading = false;
             // for testing purposes, tells us how long request took
             console.log(window.performance.now() - time);
-        })
+        }))
         .catch(err => console.warn(err));
     }
 
@@ -168,6 +205,35 @@ export default class App extends React.Component {
         this.setState({back: this.state.back.concat(this.state.page), page: newPage})
     }
 
+    // showAddresses(e) {
+    //     e.preventDefault();
+    //     if (this.state.addressIsVisible == undefined) {
+    //         this.addressIsVisible = true;
+    //     }
+    //     else {
+    //         this.setState({addressIsVisible: !addressIsVisible});
+    //     }
+    // }
+    showAddresses(e) {
+        e.preventDefault();
+        if (this.addressIsVisible) {
+            this.setState({addressIsVisible: false});
+        } else {
+            this.setState({addressIsVisible: true});
+        }
+    }
+
+    addAddress(e) {
+        e.preventDefault();
+        let newAddress = {
+            address: this.state.address
+        }
+        // add the current state to this new array using the spread
+        this.setState(
+            { addressList: [...this.state.addressList, newAddress] }
+        )
+    }
+
     /**
      * Calculate & Update state of new dimensions
      * This helps to deal with narrow windows
@@ -192,6 +258,7 @@ export default class App extends React.Component {
         console.log("rendered")
         console.log(this.state.locationsRoutes)
         console.log(this.state.numPeople)
+        console.log(this.state.addressList)
         return (
             <div className="App">
                 <html>
@@ -262,18 +329,16 @@ export default class App extends React.Component {
                                                value={this.state.numPeople}
                                                ref={(input) => { this.filesInput = input }}
                                                onChange={e => {this.changeNumCanvassers(e)}}>
-                                            {/* onChange={e => {this.changeNumCanvassers(e)}}> */}
                                         </input>
                                     </div>
                                 </div>
                             }
 
                             {/* This is what you see after selected a CSV file */}
-                            {/* conditional rendering ?*/}
                             {(this.state.page === "step2") &&
                                 <div className="processingLocations">
                                     {/* The Loading Screen */}
-                                    {(this.state.locationsRoutes == "unset" && !this.isLoading) &&
+                                    {(this.state.locationsRoutes == "unset" && this.isLoading) &&
                                         <div className="loading">
                                             <LoadingScreen></LoadingScreen>
                                         </div>
@@ -297,6 +362,16 @@ export default class App extends React.Component {
                                                         </th>
                                                         <th className="App-Sides">
                                                             {/* Add ability to adjust more paramaters of route */}
+                                                            <button class="button" onClick={e => {this.showAddresses(e)}}>View Addresses</button> 
+                                                            {(this.state.addressIsVisible == true) && 
+                                                                <div>
+                                                                    <ul>
+                                                                        {this.state.addressList.map(function(item) {
+                                                                            return <li key={item}>{item}</li>;
+                                                                        })}
+                                                                    </ul>
+                                                                </div>
+                                                            }
                                                             <div className="text">Add Address</div>
                                                             <div className="text">Remove Address</div>
                                                             <div className="text">Number Of Canvassers:</div>
@@ -327,6 +402,12 @@ export default class App extends React.Component {
                                                         <button class="button" onClick={e => {this.changeCurrentMap(e, 1)}}>Next</button>
                                                     </div>
                                                     <div>
+                                                        <button class="button" onClick={e => this.showAddresses(e)}>View Addresses</button>
+                                                        {/* {(this.state.addressIsVisible == true) && 
+                                                            <div className = "addresses">
+                                                                <PrintAddresses> </PrintAddresses>
+                                                            </div>
+                                                        } */}
                                                         <div className="text">Add Address</div>
                                                         <div className="text">Remove Address</div>
                                                         <div className="text">Number Of Canvassers:</div>

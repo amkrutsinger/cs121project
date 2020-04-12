@@ -16,29 +16,41 @@ from ortools.constraint_solver import pywrapcp
 def index():
     return render_template("index.html")
 
+@app.route('/getAddresses', methods = ['POST'])
+def getAddresses():
+    if request.method == 'POST':
+        GetLocations.placesList = getInput()
+        places = GetLocations.placesList
+        places = [string for string in places if string != ""]
+        return jsonify({"placesList": places})
+    return render_template("index.html")
+
 # Parse user input, generate distance matrix, and print routes
-@app.route('/findRoutes', methods = ['POST'])
+@app.route('/findRoutes', methods = ['GET', 'POST'])
 def findRoutes():
     if request.method == 'POST':
         numPeople = int(request.form['numPeople'])
-
         # Read in csv file and convert to array of places
         GetLocations.placesList = getInput()
         distances, coords, errors = parseInput(GetLocations.placesList)
+
         # Save this data
         GetLocations.distances = distances
         GetLocations.coords = coords
         GetLocations.errors = errors
 
+        # places = GetLocations.placesList
+        # places = [string for string in places if string != ""]
         # algorithm assumes starting and ending at first location
         # routeTimes returned in seconds
         # Find solution to Vehicle Routing Problem
-
         maxRouteTime, actualRoutes, routeTimes = getOutput(distances, GetLocations.coords, numPeople, sys.maxsize)
         
         routeUrls = getSharingURLS(actualRoutes, GetLocations.coords, GetLocations.placesList)
 
+        # return jsonify({"actual":[[actualRoutes]], "routeTimes": routeTimes, "urls": [routeUrls], "addressList": places})
         return jsonify({"actual":[[actualRoutes]], "routeTimes": routeTimes, "urls": [routeUrls]})
+
     return render_template("index.html")
 
 @app.route('/numCanvassersChanged', methods = ['POST'])
@@ -58,6 +70,16 @@ def numCanvassersChanged():
         return jsonify({"actual":[[actualRoutes]], "routeTimes": routeTimes, "urls": [routeUrls]})
     return render_template("index.html")
 
+@app.route('/addressChanged', methods = ['POST'])
+def addressChanged():
+    print('recieved')
+    if request.method == 'POST':
+        newAddress = list(str(request.get_json()['newAddress']))
+        #GetLocations.placesList += parseInput(addressAdded)
+        return jsonify(results = GetLocations.placesList)
+    return render_template("index.html")
+        
+        
 
 # --- INTERFACE FUNCTIONS --- #
 

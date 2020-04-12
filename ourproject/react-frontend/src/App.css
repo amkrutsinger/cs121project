@@ -50,6 +50,7 @@ html {
     position: relative;
 }
 
+
 .button {
     font: 20px montserrat, sans-serif;
     margin: 4px;
@@ -202,3 +203,6 @@ input[type=number]:hover::-webkit-inner-spin-button {
   }
 }
 
+.ul {
+  list-style-type: none
+}
