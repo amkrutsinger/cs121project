@@ -26,7 +26,7 @@ def getAddresses():
     return render_template("index.html")
 
 # Parse user input, generate distance matrix, and print routes
-@app.route('/findRoutes', methods = ['GET', 'POST'])
+@app.route('/findRoutes', methods = ['POST'])
 def findRoutes():
     if request.method == 'POST':
         numPeople = int(request.form['numPeople'])
@@ -39,8 +39,6 @@ def findRoutes():
         GetLocations.coords = coords
         GetLocations.errors = errors
 
-        # places = GetLocations.placesList
-        # places = [string for string in places if string != ""]
         # algorithm assumes starting and ending at first location
         # routeTimes returned in seconds
         # Find solution to Vehicle Routing Problem
@@ -74,12 +72,28 @@ def numCanvassersChanged():
 def addressChanged():
     print('recieved')
     if request.method == 'POST':
-        newAddress = list(str(request.get_json()['newAddress']))
-        #GetLocations.placesList += parseInput(addressAdded)
-        return jsonify(results = GetLocations.placesList)
+        # print(type(request.get_json()['newAddress']))
+        data = request.get_json()
+        GetLocations.placesList = list(data['data'])
+        numPeople = int(data['canvassers'])
+        # GetLocations.placesList = request.form['newAddress']
+        distances, coords, errors = parseInput(GetLocations.placesList)
+        # Save this data
+        GetLocations.distances = distances
+        GetLocations.coords = coords
+        GetLocations.errors = errors
+
+        # algorithm assumes starting and ending at first location
+        # routeTimes returned in seconds
+        # Find solution to Vehicle Routing Problem
+        maxRouteTime, actualRoutes, routeTimes = getOutput(distances, GetLocations.coords, numPeople, sys.maxsize)
+        
+        routeUrls = getSharingURLS(actualRoutes, GetLocations.coords, GetLocations.placesList)
+
+        return jsonify({"actual":[[actualRoutes]], "routeTimes": routeTimes, "urls": [routeUrls], "addressList": GetLocations.placesList})
+        # return jsonify({"actual":[[actualRoutes]], "routeTimes": routeTimes, "urls": [routeUrls]})
     return render_template("index.html")
-        
-        
+
 
 # --- INTERFACE FUNCTIONS --- #
 
@@ -166,9 +180,6 @@ def addressesToCoordinates(list):
             errors.append(result)
         else:
             coords.append(result)
-    # TO DO: Delete when done
-    print(coords)
-    print("")
     return coords, errors
 
 

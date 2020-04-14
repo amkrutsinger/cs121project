@@ -10,7 +10,6 @@ import loading from './loading.gif';
 
 // This is the width at which the screen with the map switches between side by side and vertical organization.
 const critWidth = 1000;
-// const locationsRoutes = [[[-117.7103941, 34.1069287], [-117.709978, 34.124954], [-117.709978, 34.124954], [-117.709978, 34.124954], [-117.709978, 34.124954], [-117.7326799, 34.1029753], [-117.732929, 34.103057], [-117.732929, 34.103057], [-117.7301553, 34.1021421], [-117.712313, 34.106128], [-117.7103941, 34.1069287]], [[-117.7103941, 34.1069287], [-117.706468, 34.107061], [-117.71376, 34.127773], [-117.71376, 34.127773], [-117.71376, 34.127773], [-117.71376, 34.127773], [-117.718033, 34.118387], [-117.7163543, 34.1183734], [-117.7153621, 34.1183494], [-117.718033, 34.118387], [-117.724298, 34.116698], [-117.7258054, 34.1166113], [-117.733133, 34.116757], [-117.733133, 34.116757], [-117.7111516, 34.1069425], [-117.7103941, 34.1069287]]];
 
 
 /** TITLE AND BODY TEXT FOR PAGES **/
@@ -62,29 +61,6 @@ function LoadingScreen() {
     )
 }
 
-// function PrintAddresses(props) {
-//     return (
-//         <div className = "list">
-//             <ul>
-//             {props.addressList.map(function(item) {
-//                 return <li key={item}>{item}</li>;
-//             })}
-//             </ul>
-//         </div>
-//     )
-// }
-
-// function IdiomaticReactList(props) {
-//     return (
-//       <div>
-//         {props.items.map((item, index) => (
-//           <Item key={index} item={item} />
-//         ))}
-//       </div>
-//     );
-//   }
-  
-
 
 
 /** THE MAIN SITE DRIVER **/
@@ -116,7 +92,7 @@ export default class App extends React.Component {
             // (excluding the current one)
             back: [],
             isLoading: undefined,
-            addressIsVisible: undefined,
+            showAddress: false,
             wide: window.innerWidth > critWidth,
 
             // temporary list to overwrite
@@ -124,10 +100,8 @@ export default class App extends React.Component {
             urls: "unset",
             numPeople: 1,
             currentMap: 0,
-            addressList: undefined,
+            addressList: undefined
         };
-        // this.showAddresses = this.showAddresses.bind(this);
-        // this.boundHandleFetchRoute = this.handleFetchRoute.bind(this);
     }
 
     // Use: upload .csv file to flask/python for further analysis
@@ -146,9 +120,7 @@ export default class App extends React.Component {
       this.isLoading = true;
       axios
         .all([axios.post("/getAddresses", formData), axios.post("/findRoutes", formData)])
-        // .post("/findRoutes", formData)
         .then(axios.spread(function (addresses, route) {
-        // .then(res => {
             self.isLoading = true;
             // update state and getting location routes from backend
             let address = addresses.data;
@@ -158,7 +130,6 @@ export default class App extends React.Component {
                 locationsRoutes: routes.actual, 
                 urls: routes.urls
             })
-            // self.setState({locationsRoutes: res.data.actual, urls: res.data.urls, addressList: res.data.addressList})
             self.isLoading = false;
             // for testing purposes, tells us how long request took
             console.log(window.performance.now() - time);
@@ -178,17 +149,41 @@ export default class App extends React.Component {
         this.setState({currentMap: ((this.state.currentMap + changer) >= 0 ? this.state.currentMap + changer : 0)})
     }
 
-    // This updates the routing algorithm when number of canvasser changes is applied
+    /**
+     * This updates the routing algorithm when number of canvassers 
+     * changes or address is added is applied
+     */ 
     updateRoutes(e) {
         this.setState({locationsRoutes: 'unset'})
         const numCanvassers = {"numPeople": this.state.numPeople};
+        // make a "package" with relevant info
+        const newAddresses = {
+            data: this.state.addressList,
+            canvassers: this.state.numPeople
+        }
+        console.log(this.state.addressList)
         var self = this;
         axios
-          .post("/numCanvassersChanged", numCanvassers)
-          .then(res => {
-                self.setState({locationsRoutes: res.data.actual, urls: res.data.urls});
-            })
-          .catch(err => console.warn(err));
+        //   .post("/numCanvassersChanged", numCanvassers)
+            .all[axios.post("/numCanvassersChanged", numCanvassers), axios.post("/addressChanged", newAddresses)]
+            .then(axios.spread(function (addresses, route) {
+                self.isLoading = true;
+                // update state and getting location routes from backend
+                let address = addresses.data;
+                let routes = route.data
+                self.setState({
+                    addressList: address.placesList,
+                    locationsRoutes: routes.actual, 
+                    urls: routes.urls
+                })
+                self.isLoading = false;
+            }))
+            // TO DO: delete when done
+            // for testing purposes
+            console.log("update")
+            console.log(this.state.addressList)
+            
+            .catch(err => console.warn(err));
     }
 
     // Used for back button
@@ -205,33 +200,25 @@ export default class App extends React.Component {
         this.setState({back: this.state.back.concat(this.state.page), page: newPage})
     }
 
-    // showAddresses(e) {
-    //     e.preventDefault();
-    //     if (this.state.addressIsVisible == undefined) {
-    //         this.addressIsVisible = true;
-    //     }
-    //     else {
-    //         this.setState({addressIsVisible: !addressIsVisible});
-    //     }
-    // }
-    showAddresses(e) {
+    // Updates showAddress state upon click
+    toggleShowAddresses(e) {
         e.preventDefault();
-        if (this.addressIsVisible) {
-            this.setState({addressIsVisible: false});
-        } else {
-            this.setState({addressIsVisible: true});
-        }
+        this.setState({showAddress: !this.state.showAddress});
     }
 
+    /**
+     * adds the inputted address to the addressList
+     */
     addAddress(e) {
+        // this.setState({numPeople: e.target.value})
         e.preventDefault();
-        let newAddress = {
-            address: this.state.address
+        var newAddress = e.target.value;
+        // this.setState({address: e.target.value})
+        let toAdd = {
+            address: newAddress
         }
         // add the current state to this new array using the spread
-        this.setState(
-            { addressList: [...this.state.addressList, newAddress] }
-        )
+        this.setState({addressList: [...this.state.addressList, toAdd['address']]});
     }
 
     /**
@@ -258,7 +245,6 @@ export default class App extends React.Component {
         console.log("rendered")
         console.log(this.state.locationsRoutes)
         console.log(this.state.numPeople)
-        console.log(this.state.addressList)
         return (
             <div className="App">
                 <html>
@@ -362,10 +348,12 @@ export default class App extends React.Component {
                                                         </th>
                                                         <th className="App-Sides">
                                                             {/* Add ability to adjust more paramaters of route */}
-                                                            <button class="button" onClick={e => {this.showAddresses(e)}}>View Addresses</button> 
-                                                            {(this.state.addressIsVisible == true) && 
+                                                            <button class="button" onClick={e => {this.toggleShowAddresses(e)}}>View Addresses</button> 
+                                                            {/* TO DO: Fix toggle ability */}
+                                                            {(this.state.showAddress == true) && 
                                                                 <div>
                                                                     <ul>
+                                                                        {/* print each address in the addressList */}
                                                                         {this.state.addressList.map(function(item) {
                                                                             return <li key={item}>{item}</li>;
                                                                         })}
@@ -373,6 +361,17 @@ export default class App extends React.Component {
                                                                 </div>
                                                             }
                                                             <div className="text">Add Address</div>
+                                                            {/* input box for adding an address */}
+                                                            <div class = "description">
+                                                                <input type="text"
+                                                                    name="newAddress"
+                                                                    id = "newAddress"
+                                                                    class = "inputAddress"
+                                                                    value = {this.state.address}
+                                                                    ref={(input) => { this.filesInput = input }}
+                                                                    onChange={e => {this.addAddress(e)}}>
+                                                                </input>
+                                                            </div>
                                                             <div className="text">Remove Address</div>
                                                             <div className="text">Number Of Canvassers:</div>
                                                             <div class="description">
@@ -402,12 +401,16 @@ export default class App extends React.Component {
                                                         <button class="button" onClick={e => {this.changeCurrentMap(e, 1)}}>Next</button>
                                                     </div>
                                                     <div>
-                                                        <button class="button" onClick={e => this.showAddresses(e)}>View Addresses</button>
-                                                        {/* {(this.state.addressIsVisible == true) && 
-                                                            <div className = "addresses">
-                                                                <PrintAddresses> </PrintAddresses>
+                                                        <button class="button" onClick={e => this.toggleShowAddresses(e)}>View Addresses</button>
+                                                        {(this.state.addressIsVisible == true) && 
+                                                            <div>
+                                                                <ul>
+                                                                    {this.state.addressList.map(function(item) {
+                                                                        return <li key={item}>{item}</li>;
+                                                                    })}
+                                                                </ul>
                                                             </div>
-                                                        } */}
+                                                        }
                                                         <div className="text">Add Address</div>
                                                         <div className="text">Remove Address</div>
                                                         <div className="text">Number Of Canvassers:</div>
