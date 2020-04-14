@@ -3,6 +3,15 @@
   font: 20px montserrat, sans-serif;
 }
 
+progressBar {
+  height: 20;
+  width: '100%';
+  background: white;
+  border-color: black;
+  border-width: 2px;
+  border-radius: 5px;
+}
+
 html {
   background: url(./background.jpg) no-repeat center center fixed;
   -webkit-background-size: cover;
@@ -40,6 +49,7 @@ html {
     border: 4px solid rgb(0,100,0);
     position: relative;
 }
+
 
 .button {
     font: 20px montserrat, sans-serif;
@@ -191,4 +201,8 @@ input[type=number]:hover::-webkit-inner-spin-button {
   to {
     transform: rotate(360deg);
   }
+}
+
+.ul {
+  list-style-type: none
 }
