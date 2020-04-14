@@ -164,7 +164,6 @@ export default class App extends React.Component {
         console.log(this.state.addressList)
         var self = this;
         axios
-        //   .post("/numCanvassersChanged", numCanvassers)
             .all[axios.post("/numCanvassersChanged", numCanvassers), axios.post("/addressChanged", newAddresses)]
             .then(axios.spread(function (addresses, route) {
                 self.isLoading = true;
@@ -210,10 +209,9 @@ export default class App extends React.Component {
      * adds the inputted address to the addressList
      */
     addAddress(e) {
-        // this.setState({numPeople: e.target.value})
         e.preventDefault();
+        // TO DO: figure out a way to only have this happen WHEN the person is done entering in the address
         var newAddress = e.target.value;
-        // this.setState({address: e.target.value})
         let toAdd = {
             address: newAddress
         }
