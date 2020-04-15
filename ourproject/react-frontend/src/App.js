@@ -38,7 +38,7 @@ const howBody3 = 'All possible cycles in the graph of perhaps very many nodes is
 const howBody4 = 'To understand all the techniques OR-tools uses to find the optimal solution would be a huge undertaking in itself so here’s an overview of the methods. OR-tools uses local search optimization which defines a neighborhood of local solutions, which likely means a set of solutions with only one or a few node changes in the path(s). It then tries to do what is called hill climbing which means to find the “best” solution in the local area and then repeat until a peak is found. This technique only finds a locally optimal solution which is not necessarily the one true best solution. There are techniques we could try that OR-tools has to not stop at locally optimal solutions, and keep searching to increase the likelihood of finding the global best, or true optimal but benefits are likely small and have large runtime increases.'
 
 
-/** FUNCTIONS TO DISPLAY TITLE AND BODY ON PAGES **/
+/** FUNCTIONS TO DISPLAY CONTENT ON PAGES **/
 
 // A simple template to display text for pages on site
 function SimpleTemplate(props) {
@@ -57,6 +57,40 @@ function LoadingScreen() {
             <p className="big-text">LOADING...</p>
                 {/* added a loading gif */}
                 <img src={loading}></img>
+        </div>
+    )
+}
+
+// Displays the current map with buttons to flip to other maps (different canvassers routes)
+function DisplayMap(props) {
+    const [currentMap, setCurrentMap] = useState(0)
+
+    return (
+        <div>
+            <Directions coordRoute={props.locationsRoutes[0][0][currentMap % props.locationsRoutes[0][0].length]}/>
+            <div className="text"> Route: {currentMap % props.locationsRoutes[0][0].length + 1}</div>
+            <button class="button" onClick={() => setCurrentMap((currentMap - 1) >= 0 ? currentMap - 1 : 0)}> Previous </button>
+            <button class="button" onClick={() => setCurrentMap((currentMap + 1) >= 0 ? currentMap + 1 : 0)}> Next </button>
+        </div>
+    )
+}
+
+// Display list of addresses with button to toggle visibility of list
+function ShowAddresses(props) {
+    const [show, setShow] = useState(false)
+
+    return (
+        <div>
+            {show && <button class="button" onClick={() => setShow(!show)}> Hide Addresses </button>}
+            {!show && <button class="button" onClick={() => setShow(!show)}> View Addresses </button>}
+            {show &&
+                <ul>
+                    {/* print each address in the addressList */}
+                    {props.addressList.map(function(item) {
+                        return <li key={item}>{item}</li>;
+                    })}
+                </ul>
+            }
         </div>
     )
 }
@@ -99,7 +133,6 @@ export default class App extends React.Component {
             locationsRoutes: "unset",
             urls: "unset",
             numPeople: 1,
-            currentMap: 0,
             addressList: undefined
         };
     }
@@ -113,7 +146,7 @@ export default class App extends React.Component {
 
       formData.append("file", file);
       formData.append("numPeople", this.state.numPeople.toString());
-      
+
       var self = this;
       // for testing purposes
       const time = window.performance.now();
@@ -127,7 +160,7 @@ export default class App extends React.Component {
             let routes = route.data
             self.setState({
                 addressList: address.placesList,
-                locationsRoutes: routes.actual, 
+                locationsRoutes: routes.actual,
                 urls: routes.urls
             })
             self.isLoading = false;
@@ -150,9 +183,9 @@ export default class App extends React.Component {
     }
 
     /**
-     * This updates the routing algorithm when number of canvassers 
+     * This updates the routing algorithm when number of canvassers
      * changes or address is added is applied
-     */ 
+     */
     updateRoutes(e) {
         this.setState({locationsRoutes: 'unset'})
         const numCanvassers = {"numPeople": this.state.numPeople};
@@ -172,7 +205,7 @@ export default class App extends React.Component {
                 let routes = route.data
                 self.setState({
                     addressList: address.placesList,
-                    locationsRoutes: routes.actual, 
+                    locationsRoutes: routes.actual,
                     urls: routes.urls
                 })
                 self.isLoading = false;
@@ -181,7 +214,7 @@ export default class App extends React.Component {
             // for testing purposes
             console.log("update")
             console.log(this.state.addressList)
-            
+
             .catch(err => console.warn(err));
     }
 
@@ -243,11 +276,11 @@ export default class App extends React.Component {
         console.log("rendered")
         console.log(this.state.locationsRoutes)
         console.log(this.state.numPeople)
+
         return (
             <div className="App">
                 <html>
                     <PageHeader/>
-
                     {/* Create a sidebar menu (manually) */}
                     <div className="sidebar">
                         <button className="button-side" onClick={() => {this.goToPage("home")}}> Home </button>
@@ -262,7 +295,7 @@ export default class App extends React.Component {
 
                             {/* A back button - when user has a page in their history */}
                             {(this.state.back.length > 0) &&
-                                <button className="button-alt" onClick={() => {this.goBack()}}>Back</button>
+                                <button className="button-alt" onClick={() => {this.goBack()}}> Back </button>
                             }
 
                             {/* The Home Page */}
@@ -318,13 +351,13 @@ export default class App extends React.Component {
                                 </div>
                             }
 
-                            {/* This is what you see after selected a CSV file */}
+                            {/* This is what you see after selecting a CSV file */}
                             {(this.state.page === "step2") &&
                                 <div className="processingLocations">
                                     {/* The Loading Screen */}
                                     {(this.state.locationsRoutes == "unset" && this.isLoading) &&
                                         <div className="loading">
-                                            <LoadingScreen></LoadingScreen>
+                                            <LoadingScreen />
                                         </div>
                                     }
                                     {(this.state.locationsRoutes != "unset") &&
@@ -339,25 +372,12 @@ export default class App extends React.Component {
                                                 <table className="App-header">
                                                     <tr className="App-row">
                                                         <th className="App-Sides" id="mapBox">
-                                                            <Directions coordRoute={this.state.locationsRoutes[0][0][this.state.currentMap % this.state.locationsRoutes[0][0].length]}/>
-                                                            <div className="text"> Route: {this.state.currentMap % this.state.locationsRoutes[0][0].length + 1}</div>
-                                                            <button class="button" onClick={e => {this.changeCurrentMap(e, -1)}}>Previous</button>
-                                                            <button class="button" onClick={e => {this.changeCurrentMap(e, 1)}}>Next</button>
+                                                            <DisplayMap locationsRoutes={this.state.locationsRoutes} />
                                                         </th>
                                                         <th className="App-Sides">
-                                                            {/* Add ability to adjust more paramaters of route */}
-                                                            <button class="button" onClick={e => {this.toggleShowAddresses(e)}}>View Addresses</button> 
-                                                            {/* TO DO: Fix toggle ability */}
-                                                            {(this.state.showAddress == true) && 
-                                                                <div>
-                                                                    <ul>
-                                                                        {/* print each address in the addressList */}
-                                                                        {this.state.addressList.map(function(item) {
-                                                                            return <li key={item}>{item}</li>;
-                                                                        })}
-                                                                    </ul>
-                                                                </div>
-                                                            }
+                                                            {/* Functionality to Add/Remove Addresses */}
+                                                            <ShowAddresses addressList={this.state.addressList} />
+
                                                             <div className="text">Add Address</div>
                                                             {/* input box for adding an address */}
                                                             <div class = "description">
@@ -392,23 +412,9 @@ export default class App extends React.Component {
                                             {/* When screen is narrow show map above editors */}
                                             {!this.state.wide &&
                                                 <div>
+                                                    <DisplayMap locationsRoutes={this.state.locationsRoutes} />
                                                     <div>
-                                                        <Directions coordRoute={this.state.locationsRoutes[0][0][this.state.currentMap % this.state.locationsRoutes[0][0].length]}/>
-                                                        <div className="text"> Route: {this.state.currentMap % this.state.locationsRoutes[0][0].length + 1}</div>
-                                                        <button class="button" onClick={e => {this.changeCurrentMap(e, -1)}}>Previous</button>
-                                                        <button class="button" onClick={e => {this.changeCurrentMap(e, 1)}}>Next</button>
-                                                    </div>
-                                                    <div>
-                                                        <button class="button" onClick={e => this.toggleShowAddresses(e)}>View Addresses</button>
-                                                        {(this.state.addressIsVisible == true) && 
-                                                            <div>
-                                                                <ul>
-                                                                    {this.state.addressList.map(function(item) {
-                                                                        return <li key={item}>{item}</li>;
-                                                                    })}
-                                                                </ul>
-                                                            </div>
-                                                        }
+                                                        <ShowAddresses addressList={this.state.addressList} />
                                                         <div className="text">Add Address</div>
                                                         <div className="text">Remove Address</div>
                                                         <div className="text">Number Of Canvassers:</div>
