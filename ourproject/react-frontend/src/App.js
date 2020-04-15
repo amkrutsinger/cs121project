@@ -76,7 +76,8 @@ function DisplayMap(props) {
 }
 
 // Display list of addresses with button to toggle visibility of list
-function ShowAddresses(props) {
+// And buttons to remove addresses
+function DisplayAddresses(props) {
     const [show, setShow] = useState(false)
 
     return (
@@ -87,11 +88,37 @@ function ShowAddresses(props) {
                 <ul>
                     {/* print each address in the addressList */}
                     {props.addressList.map(function(item) {
-                        return <li key={item}>{item}</li>;
+                        return (
+                            <li key={item}>
+                                <div>
+                                    <input
+                                        type="button"
+                                        className="button"
+                                        id="removeAddress"
+                                        value="-"
+                                        onClick={() => {props.callback(item)}}>
+                                    </input>
+                                    &nbsp; {item}
+                                </div>
+                            </li>
+                        )
                     })}
                 </ul>
             }
         </div>
+    )
+}
+
+// Display a button to update the number of canvassers
+function ChangeCanvassers(props) {
+    return (
+        <input type="number"
+               name="numCanvassers"
+               id="numCanvassers"
+               class="inputNum"
+               value={props.numPeople}
+               onChange={props.callback}>
+        </input>
     )
 }
 
@@ -125,13 +152,14 @@ export default class App extends React.Component {
             // Used to keep track of visited pages - last item is the most recently visited page
             // (excluding the current one)
             back: [],
+
             isLoading: undefined,
-            showAddress: false,
             wide: window.innerWidth > critWidth,
 
             // temporary list to overwrite
             locationsRoutes: "unset",
             urls: "unset",
+
             numPeople: 1,
             addressList: undefined
         };
@@ -253,6 +281,14 @@ export default class App extends React.Component {
     }
 
     /**
+     * removes the inputted address from the addressList
+     */
+     removeAddress (address) {
+        console.log('Address:: ', address)
+        // TODO
+    }
+
+    /**
      * Calculate & Update state of new dimensions
      * This helps to deal with narrow windows
      */
@@ -338,16 +374,7 @@ export default class App extends React.Component {
                                     </div>
 
                                     <p className ="text"> How many canvassers do you have? </p>
-                                    <div>
-                                        <input type="number"
-                                               name="numCanvassers"
-                                               id="numCanvassers"
-                                               class="inputNum"
-                                               value={this.state.numPeople}
-                                               ref={(input) => { this.filesInput = input }}
-                                               onChange={e => {this.changeNumCanvassers(e)}}>
-                                        </input>
-                                    </div>
+                                    <ChangeCanvassers numPeople={this.state.numPeople} callback={e => {this.changeNumCanvassers(e)}} />
                                 </div>
                             }
 
@@ -376,7 +403,7 @@ export default class App extends React.Component {
                                                         </th>
                                                         <th className="App-Sides">
                                                             {/* Functionality to Add/Remove Addresses */}
-                                                            <ShowAddresses addressList={this.state.addressList} />
+                                                            <DisplayAddresses addressList={this.state.addressList} callback={this.removeAddress} />
 
                                                             <div className="text">Add Address</div>
                                                             {/* input box for adding an address */}
@@ -391,18 +418,12 @@ export default class App extends React.Component {
                                                                 </input>
                                                             </div>
                                                             <div className="text">Remove Address</div>
+
                                                             <div className="text">Number Of Canvassers:</div>
-                                                            <div class="description">
-                                                                <input type="number"
-                                                                    name="numCanvassers"
-                                                                    id="numCanvassers"
-                                                                    class="inputNum"
-                                                                    value={this.state.numPeople}
-                                                                    ref={(input) => { this.filesInput = input }}
-                                                                    onChange={e => {this.changeNumCanvassers(e)}}>
-                                                                </input>
-                                                            </div>
+                                                            <ChangeCanvassers numPeople={this.state.numPeople} callback={e => {this.changeNumCanvassers(e)}} />
+
                                                             <div> <button class="button" onClick={e => {this.updateRoutes(e)}}>Apply Changes</button> </div>
+
                                                             <CSVLink class="button" filename="your-routes.csv" data={this.state.urls}>Route Directions</CSVLink>
                                                         </th>
                                                     </tr>
@@ -414,21 +435,16 @@ export default class App extends React.Component {
                                                 <div>
                                                     <DisplayMap locationsRoutes={this.state.locationsRoutes} />
                                                     <div>
-                                                        <ShowAddresses addressList={this.state.addressList} />
+                                                        <DisplayAddresses addressList={this.state.addressList} callback={this.removeAddress} />
+
                                                         <div className="text">Add Address</div>
                                                         <div className="text">Remove Address</div>
+
                                                         <div className="text">Number Of Canvassers:</div>
-                                                        <div class="description">
-                                                            <input type="number"
-                                                                name="numCanvassers"
-                                                                id="numCanvassers"
-                                                                class="inputNum"
-                                                                value={this.state.numPeople}
-                                                                ref={(input) => { this.filesInput = input }}
-                                                                onChange={e => {this.changeNumCanvassers(e)}}>
-                                                            </input>
-                                                        </div>
+                                                        <ChangeCanvassers numPeople={this.state.numPeople} callback={e => {this.changeNumCanvassers(e)}} />
+
                                                         <div> <button class="button" onClick={e => {this.updateRoutes(e)}}>Apply Changes</button> </div>
+
                                                         <CSVLink class="button" filename="your-routes.csv" data={this.state.urls}>Route Directions</CSVLink>
                                                     </div>
                                                 </div>
