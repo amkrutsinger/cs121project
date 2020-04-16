@@ -190,6 +190,7 @@ export default class App extends React.Component {
 
             isLoading: undefined,
             wide: window.innerWidth > critWidth,
+            develop: false,
 
             // temporary list to overwrite
             locationsRoutes: "unset",
@@ -209,6 +210,7 @@ export default class App extends React.Component {
 
       formData.append("file", file);
       formData.append("numPeople", this.state.numPeople.toString());
+      formData.append("develop", this.state.develop);
 
       var self = this;
       // for testing purposes
@@ -250,12 +252,11 @@ export default class App extends React.Component {
         // make a "package" with relevant info
         const newData = {
             data: this.state.addressList,
-            canvassers: this.state.numPeople
+            canvassers: this.state.numPeople,
+            develop: this.state.develop
         }
-        console.log(this.state.addressList)
-        console.log(newData['canvassers'])
-        var self = this;
 
+        var self = this;
         self.isLoading = true;
         axios
             .all([axios.post("/applyChanges", newData)])
@@ -284,12 +285,6 @@ export default class App extends React.Component {
     // (updates page and back)
     goToPage(newPage) {
         this.setState({back: this.state.back.concat(this.state.page), page: newPage})
-    }
-
-    // Updates showAddress state upon click
-    toggleShowAddresses(e) {
-        e.preventDefault();
-        this.setState({showAddress: !this.state.showAddress});
     }
 
     /**
@@ -348,6 +343,8 @@ export default class App extends React.Component {
                         <button className="button-side" onClick={() => {this.goToPage("home")}}> Home </button>
                         <button className="button-side" onClick={() => {this.goToPage("about")}}> About Us </button>
                         <button className="button-side" onClick={() => {this.goToPage("how")}}> How It Works </button>
+                        {!this.state.develop && <button className="button-side" onClick={() => {this.setState({develop: true})}}> Developer Mode </button>}
+                        {this.state.develop && <button className="button-side" onClick={() => {this.setState({develop: false})}}> User Mode </button>}
                     </div>
 
                     <div className="page">

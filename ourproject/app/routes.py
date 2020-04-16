@@ -7,6 +7,21 @@ import time
 from ortools.constraint_solver import routing_enums_pb2
 from ortools.constraint_solver import pywrapcp
 
+
+# --- DEVELOPER MODE DATA --- #
+
+# With 1 Canvasser
+route1 = [[[-117.7083, 34.105748], [-117.71012, 34.10382], [-117.714692, 34.094769], [-117.705641, 34.104064], [-117.706716, 34.10235], [-117.7083, 34.105748]]]
+time1 = [779]
+share1 = ['google.com/maps/dir/34.105748,+-117.7083/34.10382,+-117.71012/34.094769,+-117.714692/34.104064,+-117.705641/34.10235,+-117.706716/34.105748,+-117.7083/']
+
+# With 3 Canvassers
+route3 = [[[-117.7083, 34.105748], [-117.71012, 34.10382], [-117.7083, 34.105748]], [[-117.7083, 34.105748], [-117.714692, 34.094769], [-117.7083, 34.105748]], [[-117.7083, 34.105748], [-117.706716, 34.10235], [-117.705641, 34.104064], [-117.7083, 34.105748]]]
+time3 = [371, 569, 350]
+share3 = ['google.com/maps/dir/34.105748,+-117.7083/34.10382,+-117.71012/34.105748,+-117.7083/', 'google.com/maps/dir/34.105748,+-117.7083/34.094769,+-117.714692/34.105748,+-117.7083/', 'google.com/maps/dir/34.105748,+-117.7083/34.10235,+-117.706716/34.104064,+-117.705641/34.105748,+-117.7083/']
+
+
+
 # --- ROUTES --- #
 
 # Set up the homepage with the routes, map, and errors
@@ -30,6 +45,10 @@ def getAddresses():
 @app.route('/findRoutes', methods = ['POST'])
 def findRoutes():
     if request.method == 'POST':
+        # For developer mode - only works if numPeople is 1, 3
+        if request.form['develop'] is 'true':
+            return testingGetRoutes(int(request.form['numPeople']))
+
         # Read in csv file and convert to array of places
         return getRoutes(int(request.form['numPeople']))
     return render_template("index.html")
@@ -39,10 +58,23 @@ def findRoutes():
 def applyChanges():
     if request.method == 'POST':
         data = request.get_json()
+
+        # For developer mode - only works if numPeople is 1, 3
+        if data['develop']:
+            return testingGetRoutes(int(data['canvassers']))
+
         GetLocations.placesList = list(data['data'])
-        #GetLocations.placesList = request.form['newAddress']
         return getRoutes(int(data['canvassers']))
     return render_template("index.html")
+
+# --- TESTING FUNCTIONS --- #
+
+# Output: a default list of routes
+def testingGetRoutes(numPeople):
+    if numPeople is 1:
+        return jsonify({"actual":[[route1]], "routeTimes": time1, "urls": [share1]})
+    else:
+        return jsonify({"actual":[[route3]], "routeTimes": time3, "urls": [share3]})
 
 
 # --- INTERFACE FUNCTIONS --- #
@@ -65,7 +97,7 @@ def getRoutes(numPeople):
     maxRouteTime, actualRoutes, routeTimes = getOutput(distances, GetLocations.coords, numPeople, sys.maxsize)
 
     routeUrls = getSharingURLS(actualRoutes, GetLocations.coords, GetLocations.placesList)
-    return jsonify({"actual":[[actualRoutes]], "routeTimes": routeTimes, "urls": [routeUrls], "addressList": GetLocations.placesList})
+    return jsonify({"actual":[[actualRoutes]], "routeTimes": routeTimes, "urls": [routeUrls]})
 
 # Input: .csv file (passed through request)
 # Output: list of items in .csv file
