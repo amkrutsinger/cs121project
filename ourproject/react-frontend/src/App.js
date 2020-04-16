@@ -68,7 +68,7 @@ function DisplayMap(props) {
     return (
         <div>
             <Directions coordRoute={props.locationsRoutes[0][0][currentMap % props.locationsRoutes[0][0].length]}/>
-            <div className="text"> Route: {currentMap % props.locationsRoutes[0][0].length + 1}</div>
+            <div className="text"> Route: {currentMap % props.locationsRoutes[0][0].length + 1} </div>
             <button class="button" onClick={() => setCurrentMap((currentMap - 1) >= 0 ? currentMap - 1 : 0)}> Previous </button>
             <button class="button" onClick={() => setCurrentMap((currentMap + 1) >= 0 ? currentMap + 1 : 0)}> Next </button>
         </div>
@@ -150,7 +150,8 @@ function AddAddress(props) {
 
             {/* input box for adding an address */}
             <div class = "description">
-                <input type="text"
+                <input
+                    type="text"
                     name="newAddress"
                     id = "newAddress"
                     class = "inputAddress"
@@ -245,33 +246,29 @@ export default class App extends React.Component {
      */
     updateRoutes(e) {
         this.setState({locationsRoutes: 'unset'})
-        const numCanvassers = {"numPeople": this.state.numPeople};
+
         // make a "package" with relevant info
-        const newAddresses = {
+        const newData = {
             data: this.state.addressList,
             canvassers: this.state.numPeople
         }
         console.log(this.state.addressList)
+        console.log(newData['canvassers'])
         var self = this;
+
+        self.isLoading = true;
         axios
-            .all[axios.post("/numCanvassersChanged", numCanvassers), axios.post("/addressChanged", newAddresses)]
-            .then(axios.spread(function (addresses, route) {
+            .all([axios.post("/applyChanges", newData)])
+            .then(axios.spread(function (route) {
                 self.isLoading = true;
                 // update state and getting location routes from backend
-                let address = addresses.data;
                 let routes = route.data
                 self.setState({
-                    addressList: address.placesList,
                     locationsRoutes: routes.actual,
                     urls: routes.urls
                 })
                 self.isLoading = false;
             }))
-            // TO DO: delete when done
-            // for testing purposes
-            console.log("update")
-            console.log(this.state.addressList)
-
             .catch(err => console.warn(err));
     }
 
@@ -415,7 +412,7 @@ export default class App extends React.Component {
                                             <LoadingScreen />
                                         </div>
                                     }
-                                    
+
                                     {(this.state.locationsRoutes != "unset") &&
                                         <div className="step2">
                                             <SimpleTemplate title={mapPageTitle} body={mapPageBody} />
@@ -429,7 +426,6 @@ export default class App extends React.Component {
                                                         </th>
                                                         <th className="App-Sides">
                                                             <DisplayEditingAndSharing
-                                                                {/* Props are listed so that props for the same component are on the same line ß*/}
                                                                 addressList={this.state.addressList}  removeAddress={this.removeAddress}
                                                                 addAddress={e => {this.addAddress(e)}}
                                                                 numPeople={this.state.numPeople}  changeNumCanvassers={e => {this.changeNumCanvassers(e)}}
@@ -446,7 +442,6 @@ export default class App extends React.Component {
                                                 <div>
                                                     <DisplayMap locationsRoutes={this.state.locationsRoutes} />
                                                     <DisplayEditingAndSharing
-                                                        {/* Props are listed so that props for the same component are on the same line ß*/}
                                                         addressList={this.state.addressList}  removeAddress={this.removeAddress}
                                                         addAddress={e => {this.addAddress(e)}}
                                                         numPeople={this.state.numPeople}  changeNumCanvassers={e => {this.changeNumCanvassers(e)}}

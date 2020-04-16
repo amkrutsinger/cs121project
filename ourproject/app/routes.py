@@ -16,6 +16,7 @@ from ortools.constraint_solver import pywrapcp
 def index():
     return render_template("index.html")
 
+# Read addresses from CSV file
 @app.route('/getAddresses', methods = ['POST'])
 def getAddresses():
     if request.method == 'POST':
@@ -29,73 +30,42 @@ def getAddresses():
 @app.route('/findRoutes', methods = ['POST'])
 def findRoutes():
     if request.method == 'POST':
-        numPeople = int(request.form['numPeople'])
         # Read in csv file and convert to array of places
-        GetLocations.placesList = getInput()
-        distances, coords, errors = parseInput(GetLocations.placesList)
-
-        # Save this data
-        GetLocations.distances = distances
-        GetLocations.coords = coords
-        GetLocations.errors = errors
-
-        # algorithm assumes starting and ending at first location
-        # routeTimes returned in seconds
-        # Find solution to Vehicle Routing Problem
-        maxRouteTime, actualRoutes, routeTimes = getOutput(distances, GetLocations.coords, numPeople, sys.maxsize)
-        
-        routeUrls = getSharingURLS(actualRoutes, GetLocations.coords, GetLocations.placesList)
-
-        # return jsonify({"actual":[[actualRoutes]], "routeTimes": routeTimes, "urls": [routeUrls], "addressList": places})
-        return jsonify({"actual":[[actualRoutes]], "routeTimes": routeTimes, "urls": [routeUrls]})
-
+        return getRoutes(int(request.form['numPeople']))
     return render_template("index.html")
 
-@app.route('/numCanvassersChanged', methods = ['POST'])
-def numCanvassersChanged():
-    print('recieved')
+# Update numPeople or placesList and generate new routes
+@app.route('/applyChanges', methods = ['POST'])
+def applyChanges():
     if request.method == 'POST':
-        # get the new number of people from the input field
-        numPeople = int(request.get_json()['numPeople'])
-
-        # use the saved locations
-        # algorithm assumes starting and ending at first location
-        # routeTimes returned in seconds
-        # Find solution to Vehicle Routing Problem
-
-        maxRouteTime, actualRoutes, routeTimes = getOutput(GetLocations.distances, GetLocations.coords, numPeople, sys.maxsize)
-        routeUrls = getSharingURLS(actualRoutes, GetLocations.coords, GetLocations.placesList)
-        return jsonify({"actual":[[actualRoutes]], "routeTimes": routeTimes, "urls": [routeUrls]})
-    return render_template("index.html")
-
-@app.route('/addressChanged', methods = ['POST'])
-def addressChanged():
-    print('recieved')
-    if request.method == 'POST':
-        # print(type(request.get_json()['newAddress']))
         data = request.get_json()
         GetLocations.placesList = list(data['data'])
-        numPeople = int(data['canvassers'])
-        # GetLocations.placesList = request.form['newAddress']
-        distances, coords, errors = parseInput(GetLocations.placesList)
-        # Save this data
-        GetLocations.distances = distances
-        GetLocations.coords = coords
-        GetLocations.errors = errors
-
-        # algorithm assumes starting and ending at first location
-        # routeTimes returned in seconds
-        # Find solution to Vehicle Routing Problem
-        maxRouteTime, actualRoutes, routeTimes = getOutput(distances, GetLocations.coords, numPeople, sys.maxsize)
-        
-        routeUrls = getSharingURLS(actualRoutes, GetLocations.coords, GetLocations.placesList)
-
-        return jsonify({"actual":[[actualRoutes]], "routeTimes": routeTimes, "urls": [routeUrls], "addressList": GetLocations.placesList})
-        # return jsonify({"actual":[[actualRoutes]], "routeTimes": routeTimes, "urls": [routeUrls]})
+        #GetLocations.placesList = request.form['newAddress']
+        return getRoutes(int(data['canvassers']))
     return render_template("index.html")
 
 
 # --- INTERFACE FUNCTIONS --- #
+
+# Input: the number of canvassers/people
+# Output: an appropiate number of routes of those people with the corresponding
+#         times and urls
+def getRoutes(numPeople):
+    # Read in csv file and convert to array of places
+    distances, coords, errors = parseInput(GetLocations.placesList)
+
+    # Save this data
+    GetLocations.distances = distances
+    GetLocations.coords = coords
+    GetLocations.errors = errors
+
+    # algorithm assumes starting and ending at first location
+    # routeTimes returned in seconds
+    # Find solution to Vehicle Routing Problem
+    maxRouteTime, actualRoutes, routeTimes = getOutput(distances, GetLocations.coords, numPeople, sys.maxsize)
+
+    routeUrls = getSharingURLS(actualRoutes, GetLocations.coords, GetLocations.placesList)
+    return jsonify({"actual":[[actualRoutes]], "routeTimes": routeTimes, "urls": [routeUrls], "addressList": GetLocations.placesList})
 
 # Input: .csv file (passed through request)
 # Output: list of items in .csv file
