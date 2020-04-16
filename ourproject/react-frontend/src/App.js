@@ -1,10 +1,9 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState} from 'react';
 import axios from 'axios';
 import './App.css';
 import Directions from "./components/Directions/DirectionsIndex";
 import PageHeader from './pageHeader'
-import { withState, setDisplayName } from 'recompose';
-import { CSVLink, CSVDownload } from "react-csv";
+import { CSVLink } from "react-csv";
 
 import loading from './loading.gif';
 
@@ -56,7 +55,7 @@ function LoadingScreen() {
         <div className="description">
             <p className="big-text">LOADING...</p>
                 {/* added a loading gif */}
-                <img src={loading}></img>
+                <img src={loading} alt=""></img>
         </div>
     )
 }
@@ -64,13 +63,14 @@ function LoadingScreen() {
 // Displays the current map with buttons to flip to other maps (different canvassers routes)
 function DisplayMap(props) {
     const [currentMap, setCurrentMap] = useState(0)
+    let numRoutes = props.locationsRoutes[0][0].length
 
     return (
         <div>
-            <Directions coordRoute={props.locationsRoutes[0][0][currentMap % props.locationsRoutes[0][0].length]}/>
-            <div className="text"> Route: {currentMap % props.locationsRoutes[0][0].length + 1} </div>
-            <button class="button" onClick={() => setCurrentMap((currentMap - 1) >= 0 ? currentMap - 1 : 0)}> Previous </button>
-            <button class="button" onClick={() => setCurrentMap((currentMap + 1) >= 0 ? currentMap + 1 : 0)}> Next </button>
+            <Directions coordRoute={props.locationsRoutes[0][0][currentMap % numRoutes]}/>
+            {(numRoutes > 1) && <div className="text"> Route: {currentMap % numRoutes + 1} </div> }
+            {(numRoutes > 1) && <button class="button" onClick={() => setCurrentMap((currentMap - 1) >= 0 ? currentMap - 1 : numRoutes - 1)}> Previous </button> }
+            {(numRoutes > 1) && <button class="button" onClick={() => setCurrentMap((currentMap + 1) >= 0 ? currentMap + 1 : 0)}> Next </button> }
         </div>
     )
 }
@@ -188,16 +188,15 @@ export default class App extends React.Component {
             // (excluding the current one)
             back: [],
 
-            isLoading: undefined,
             wide: window.innerWidth > critWidth,
             develop: false,
 
             // temporary list to overwrite
-            locationsRoutes: "unset",
-            urls: "unset",
+            locationsRoutes: undefined,
+            urls: undefined,
+            addressList: undefined,
 
             numPeople: 1,
-            addressList: undefined
         };
     }
 
@@ -215,20 +214,18 @@ export default class App extends React.Component {
       var self = this;
       // for testing purposes
       const time = window.performance.now();
-      this.isLoading = true;
       axios
         .all([axios.post("/getAddresses", formData), axios.post("/findRoutes", formData)])
         .then(axios.spread(function (addresses, route) {
-            self.isLoading = true;
             // update state and getting location routes from backend
             let address = addresses.data;
             let routes = route.data
             self.setState({
                 addressList: address.placesList,
                 locationsRoutes: routes.actual,
-                urls: routes.urls
+                urls: routes.urls,
+                page: "step2"
             })
-            self.isLoading = false;
             // for testing purposes, tells us how long request took
             console.log(window.performance.now() - time);
         }))
@@ -247,7 +244,7 @@ export default class App extends React.Component {
      * changes or address is added is applied
      */
     updateRoutes(e) {
-        this.setState({locationsRoutes: 'unset'})
+        this.setState({page: "loading"})
 
         // make a "package" with relevant info
         const newData = {
@@ -257,18 +254,16 @@ export default class App extends React.Component {
         }
 
         var self = this;
-        self.isLoading = true;
         axios
             .all([axios.post("/applyChanges", newData)])
             .then(axios.spread(function (route) {
-                self.isLoading = true;
                 // update state and getting location routes from backend
                 let routes = route.data
                 self.setState({
                     locationsRoutes: routes.actual,
-                    urls: routes.urls
+                    urls: routes.urls,
+                    page: "step2"
                 })
-                self.isLoading = false;
             }))
             .catch(err => console.warn(err));
     }
@@ -330,10 +325,6 @@ export default class App extends React.Component {
     }
 
     render() {
-        console.log("rendered")
-        console.log(this.state.locationsRoutes)
-        console.log(this.state.numPeople)
-
         return (
             <div className="App">
                 <html>
@@ -377,6 +368,9 @@ export default class App extends React.Component {
                                 </div>
                             }
 
+                            {/* The Loading Screen */}
+                            {(this.state.page === "loading") && <LoadingScreen /> }
+
                             {/* This is what you see after clicking the "Get Started" button */}
                             {(this.state.page === "step1") &&
                                 <div className="step1">
@@ -390,7 +384,7 @@ export default class App extends React.Component {
                                             id="file"
                                             class="inputfile"
                                             ref={(input) => { this.filesInput = input }}
-                                            onChange={e => {this.uploadFile(e); this.goToPage("step2")}}
+                                            onChange={e => {this.uploadFile(e); this.goToPage("loading")}}
                                         />
                                         <label for="file">Choose a CSV file</label>
                                     </div>
@@ -402,42 +396,17 @@ export default class App extends React.Component {
 
                             {/* This is what you see after selecting a CSV file */}
                             {(this.state.page === "step2") &&
-                                <div className="processingLocations">
-                                    {/* The Loading Screen */}
-                                    {(this.state.locationsRoutes == "unset" && this.isLoading) &&
-                                        <div className="loading">
-                                            <LoadingScreen />
-                                        </div>
-                                    }
+                                <div className="step2">
+                                    <SimpleTemplate title={mapPageTitle} body={mapPageBody} />
 
-                                    {(this.state.locationsRoutes != "unset") &&
-                                        <div className="step2">
-                                            <SimpleTemplate title={mapPageTitle} body={mapPageBody} />
-
-                                            {/* When screen is wide side by side map and editor*/}
-                                            {this.state.wide &&
-                                                <table className="App-header">
-                                                    <tr className="App-row">
-                                                        <th className="App-Sides" id="mapBox">
-                                                            <DisplayMap locationsRoutes={this.state.locationsRoutes} />
-                                                        </th>
-                                                        <th className="App-Sides">
-                                                            <DisplayEditingAndSharing
-                                                                addressList={this.state.addressList}  removeAddress={this.removeAddress}
-                                                                addAddress={e => {this.addAddress(e)}}
-                                                                numPeople={this.state.numPeople}  changeNumCanvassers={e => {this.changeNumCanvassers(e)}}
-                                                                updateRoutes={e => {this.updateRoutes(e)}}
-                                                                urls={this.state.urls}
-                                                            />
-                                                        </th>
-                                                    </tr>
-                                                </table>
-                                            }
-
-                                            {/* When screen is narrow show map above editors */}
-                                            {!this.state.wide &&
-                                                <div>
+                                    {/* When screen is wide side by side map and editor*/}
+                                    {this.state.wide &&
+                                        <table className="App-header">
+                                            <tr className="App-row">
+                                                <th className="App-Sides" id="mapBox">
                                                     <DisplayMap locationsRoutes={this.state.locationsRoutes} />
+                                                </th>
+                                                <th className="App-Sides">
                                                     <DisplayEditingAndSharing
                                                         addressList={this.state.addressList}  removeAddress={this.removeAddress}
                                                         addAddress={e => {this.addAddress(e)}}
@@ -445,8 +414,22 @@ export default class App extends React.Component {
                                                         updateRoutes={e => {this.updateRoutes(e)}}
                                                         urls={this.state.urls}
                                                     />
-                                                </div>
-                                            }
+                                                </th>
+                                            </tr>
+                                        </table>
+                                    }
+
+                                    {/* When screen is narrow show map above editors */}
+                                    {!this.state.wide &&
+                                        <div>
+                                            <DisplayMap locationsRoutes={this.state.locationsRoutes} />
+                                            <DisplayEditingAndSharing
+                                                addressList={this.state.addressList}  removeAddress={this.removeAddress}
+                                                addAddress={e => {this.addAddress(e)}}
+                                                numPeople={this.state.numPeople}  changeNumCanvassers={e => {this.changeNumCanvassers(e)}}
+                                                updateRoutes={e => {this.updateRoutes(e)}}
+                                                urls={this.state.urls}
+                                            />
                                         </div>
                                     }
                                 </div>
