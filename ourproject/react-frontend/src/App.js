@@ -75,6 +75,26 @@ function DisplayMap(props) {
     )
 }
 
+// Displays all components on the right/bottom side of the step2 page
+function DisplayEditingAndSharing(props) {
+    return (
+        <div>
+            <DisplayAddresses addressList={props.addressList} callback={props.removeAddress} />
+            <AddAddress callback={props.addAddress} />
+
+            <div className="text">Number Of Canvassers:</div>
+            <ChangeCanvassers numPeople={props.numPeople} callback={props.changeNumCanvassers} />
+
+            <div> <button class="button" onClick={props.updateRoutes}>Apply Changes</button> </div>
+
+            <CSVLink class="button" filename="your-routes.csv" data={props.urls}>Route Directions</CSVLink>
+        </div>
+    )
+}
+
+
+/** HELPER FUNCTIONS FOR DISPLAY_EDITING_AND_SHARING **/
+
 // Display list of addresses with button to toggle visibility of list
 // And buttons to remove addresses
 function DisplayAddresses(props) {
@@ -122,6 +142,25 @@ function ChangeCanvassers(props) {
     )
 }
 
+// Display input button to add address
+function AddAddress(props) {
+    return (
+        <div>
+            <div className="text">Add Address</div>
+
+            {/* input box for adding an address */}
+            <div class = "description">
+                <input type="text"
+                    name="newAddress"
+                    id = "newAddress"
+                    class = "inputAddress"
+                    onChange={props.callback}>
+                </input>
+            </div>
+        </div>
+
+    )
+}
 
 
 /** THE MAIN SITE DRIVER **/
@@ -135,11 +174,6 @@ export default class App extends React.Component {
     //    Step 3: Set Parameters (e.g. number of campaigners)
     //    Loading page (depending on time of algorithm)
     //    Result: display path, statistics
-
-    // Potentially also add menu. Ideas for sections ...
-    // "Home" - The initial homepage and essential interactions
-    // "How it Works" - Explain algorithm, steps to use step, credit sources
-    // "About Us" - Explain that we are HMC students working on a school project
 
     // Initialize states (what parts are visible)
     constructor(props) {
@@ -205,11 +239,6 @@ export default class App extends React.Component {
         this.setState({numPeople: e.target.value})
     }
 
-    changeCurrentMap(e, changer) {
-        e.preventDefault();
-        this.setState({currentMap: ((this.state.currentMap + changer) >= 0 ? this.state.currentMap + changer : 0)})
-    }
-
     /**
      * This updates the routing algorithm when number of canvassers
      * changes or address is added is applied
@@ -273,6 +302,7 @@ export default class App extends React.Component {
         e.preventDefault();
         // TO DO: figure out a way to only have this happen WHEN the person is done entering in the address
         var newAddress = e.target.value;
+
         let toAdd = {
             address: newAddress
         }
@@ -284,7 +314,6 @@ export default class App extends React.Component {
      * removes the inputted address from the addressList
      */
      removeAddress (address) {
-        console.log('Address:: ', address)
         // TODO
     }
 
@@ -325,7 +354,6 @@ export default class App extends React.Component {
                     </div>
 
                     <div className="page">
-
                         {/* Everything in this div will be displayed in the white box */}
                         <div className="container">
 
@@ -387,13 +415,11 @@ export default class App extends React.Component {
                                             <LoadingScreen />
                                         </div>
                                     }
+                                    
                                     {(this.state.locationsRoutes != "unset") &&
                                         <div className="step2">
                                             <SimpleTemplate title={mapPageTitle} body={mapPageBody} />
 
-                                            {/* Display Map  */}
-                                            {/* TODO: Show locations  */}
-                                            {/* TODO: Add Functionality to Add/Remove Addresses */}
                                             {/* When screen is wide side by side map and editor*/}
                                             {this.state.wide &&
                                                 <table className="App-header">
@@ -402,29 +428,14 @@ export default class App extends React.Component {
                                                             <DisplayMap locationsRoutes={this.state.locationsRoutes} />
                                                         </th>
                                                         <th className="App-Sides">
-                                                            {/* Functionality to Add/Remove Addresses */}
-                                                            <DisplayAddresses addressList={this.state.addressList} callback={this.removeAddress} />
-
-                                                            <div className="text">Add Address</div>
-                                                            {/* input box for adding an address */}
-                                                            <div class = "description">
-                                                                <input type="text"
-                                                                    name="newAddress"
-                                                                    id = "newAddress"
-                                                                    class = "inputAddress"
-                                                                    value = {this.state.address}
-                                                                    ref={(input) => { this.filesInput = input }}
-                                                                    onChange={e => {this.addAddress(e)}}>
-                                                                </input>
-                                                            </div>
-                                                            <div className="text">Remove Address</div>
-
-                                                            <div className="text">Number Of Canvassers:</div>
-                                                            <ChangeCanvassers numPeople={this.state.numPeople} callback={e => {this.changeNumCanvassers(e)}} />
-
-                                                            <div> <button class="button" onClick={e => {this.updateRoutes(e)}}>Apply Changes</button> </div>
-
-                                                            <CSVLink class="button" filename="your-routes.csv" data={this.state.urls}>Route Directions</CSVLink>
+                                                            <DisplayEditingAndSharing
+                                                                {/* Props are listed so that props for the same component are on the same line ß*/}
+                                                                addressList={this.state.addressList}  removeAddress={this.removeAddress}
+                                                                addAddress={e => {this.addAddress(e)}}
+                                                                numPeople={this.state.numPeople}  changeNumCanvassers={e => {this.changeNumCanvassers(e)}}
+                                                                updateRoutes={e => {this.updateRoutes(e)}}
+                                                                urls={this.state.urls}
+                                                            />
                                                         </th>
                                                     </tr>
                                                 </table>
@@ -434,19 +445,14 @@ export default class App extends React.Component {
                                             {!this.state.wide &&
                                                 <div>
                                                     <DisplayMap locationsRoutes={this.state.locationsRoutes} />
-                                                    <div>
-                                                        <DisplayAddresses addressList={this.state.addressList} callback={this.removeAddress} />
-
-                                                        <div className="text">Add Address</div>
-                                                        <div className="text">Remove Address</div>
-
-                                                        <div className="text">Number Of Canvassers:</div>
-                                                        <ChangeCanvassers numPeople={this.state.numPeople} callback={e => {this.changeNumCanvassers(e)}} />
-
-                                                        <div> <button class="button" onClick={e => {this.updateRoutes(e)}}>Apply Changes</button> </div>
-
-                                                        <CSVLink class="button" filename="your-routes.csv" data={this.state.urls}>Route Directions</CSVLink>
-                                                    </div>
+                                                    <DisplayEditingAndSharing
+                                                        {/* Props are listed so that props for the same component are on the same line ß*/}
+                                                        addressList={this.state.addressList}  removeAddress={this.removeAddress}
+                                                        addAddress={e => {this.addAddress(e)}}
+                                                        numPeople={this.state.numPeople}  changeNumCanvassers={e => {this.changeNumCanvassers(e)}}
+                                                        updateRoutes={e => {this.updateRoutes(e)}}
+                                                        urls={this.state.urls}
+                                                    />
                                                 </div>
                                             }
                                         </div>
