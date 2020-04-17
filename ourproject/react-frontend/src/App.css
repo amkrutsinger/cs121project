@@ -3,6 +3,19 @@
   font: 20px montserrat, sans-serif;
 }
 
+ul, li {
+    list-style-type: none;
+}
+
+li {
+    padding-left: 0;
+    margin-left: 0;
+}
+
+li button {
+    margin-right: 2em;
+}
+
 progressBar {
   height: 20;
   width: '100%';

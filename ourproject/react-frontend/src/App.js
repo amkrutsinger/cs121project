@@ -1,10 +1,9 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState} from 'react';
 import axios from 'axios';
 import './App.css';
 import Directions from "./components/Directions/DirectionsIndex";
 import PageHeader from './pageHeader'
-import { withState, setDisplayName } from 'recompose';
-import { CSVLink, CSVDownload } from "react-csv";
+import { CSVLink } from "react-csv";
 
 import loading from './loading.gif';
 
@@ -38,7 +37,7 @@ const howBody3 = 'All possible cycles in the graph of perhaps very many nodes is
 const howBody4 = 'To understand all the techniques OR-tools uses to find the optimal solution would be a huge undertaking in itself so here’s an overview of the methods. OR-tools uses local search optimization which defines a neighborhood of local solutions, which likely means a set of solutions with only one or a few node changes in the path(s). It then tries to do what is called hill climbing which means to find the “best” solution in the local area and then repeat until a peak is found. This technique only finds a locally optimal solution which is not necessarily the one true best solution. There are techniques we could try that OR-tools has to not stop at locally optimal solutions, and keep searching to increase the likelihood of finding the global best, or true optimal but benefits are likely small and have large runtime increases.'
 
 
-/** FUNCTIONS TO DISPLAY TITLE AND BODY ON PAGES **/
+/** FUNCTIONS TO DISPLAY CONTENT ON PAGES **/
 
 // A simple template to display text for pages on site
 function SimpleTemplate(props) {
@@ -56,11 +55,113 @@ function LoadingScreen() {
         <div className="description">
             <p className="big-text">LOADING...</p>
                 {/* added a loading gif */}
-                <img src={loading}></img>
+                <img src={loading} alt=""></img>
         </div>
     )
 }
 
+// Displays the current map with buttons to flip to other maps (different canvassers routes)
+function DisplayMap(props) {
+    const [currentMap, setCurrentMap] = useState(0)
+    let numRoutes = props.locationsRoutes[0][0].length
+
+    return (
+        <div>
+            <Directions coordRoute={props.locationsRoutes[0][0][currentMap % numRoutes]}/>
+            {(numRoutes > 1) && <div className="text"> Route: {currentMap % numRoutes + 1} </div> }
+            {(numRoutes > 1) && <button class="button" onClick={() => setCurrentMap((currentMap - 1) >= 0 ? currentMap - 1 : numRoutes - 1)}> Previous </button> }
+            {(numRoutes > 1) && <button class="button" onClick={() => setCurrentMap((currentMap + 1) >= 0 ? currentMap + 1 : 0)}> Next </button> }
+        </div>
+    )
+}
+
+// Displays all components on the right/bottom side of the step2 page
+function DisplayEditingAndSharing(props) {
+    return (
+        <div>
+            <DisplayAddresses addressList={props.addressList} callback={props.removeAddress} />
+            <AddAddress callback={props.addAddress} />
+
+            <div className="text">Number Of Canvassers:</div>
+            <ChangeCanvassers numPeople={props.numPeople} callback={props.changeNumCanvassers} />
+
+            <div> <button class="button" onClick={props.updateRoutes}>Apply Changes</button> </div>
+
+            <CSVLink class="button" filename="your-routes.csv" data={props.urls}>Route Directions</CSVLink>
+        </div>
+    )
+}
+
+
+/** HELPER FUNCTIONS FOR DISPLAY_EDITING_AND_SHARING **/
+
+// Display list of addresses with button to toggle visibility of list
+// And buttons to remove addresses
+function DisplayAddresses(props) {
+    const [show, setShow] = useState(false)
+
+    return (
+        <div>
+            {show && <button class="button" onClick={() => setShow(!show)}> Hide Addresses </button>}
+            {!show && <button class="button" onClick={() => setShow(!show)}> View Addresses </button>}
+            {show &&
+                <ul>
+                    {/* print each address in the addressList */}
+                    {props.addressList.map(function(item) {
+                        return (
+                            <li key={item}>
+                                <div>
+                                    <input
+                                        type="button"
+                                        className="button"
+                                        id="removeAddress"
+                                        value="-"
+                                        onClick={() => {props.callback(item)}}>
+                                    </input>
+                                    &nbsp; {item}
+                                </div>
+                            </li>
+                        )
+                    })}
+                </ul>
+            }
+        </div>
+    )
+}
+
+// Display a button to update the number of canvassers
+function ChangeCanvassers(props) {
+    return (
+        <input type="number"
+               name="numCanvassers"
+               id="numCanvassers"
+               class="inputNum"
+               value={props.numPeople}
+               onChange={props.callback}>
+        </input>
+    )
+}
+
+// Display input button to add address
+function AddAddress(props) {
+    return (
+        <div>
+            <div className="text">Add Address</div>
+
+            {/* input box for adding an address */}
+            <div class = "description">
+                <input
+                    type="text"
+                    name="newAddress"
+                    id = "newAddress"
+                    class = "inputAddress"
+                    onChange={props.callback}>
+                </input>
+            </div>
+        </div>
+
+    )
+}
 
 
 /** THE MAIN SITE DRIVER **/
@@ -75,11 +176,6 @@ export default class App extends React.Component {
     //    Loading page (depending on time of algorithm)
     //    Result: display path, statistics
 
-    // Potentially also add menu. Ideas for sections ...
-    // "Home" - The initial homepage and essential interactions
-    // "How it Works" - Explain algorithm, steps to use step, credit sources
-    // "About Us" - Explain that we are HMC students working on a school project
-
     // Initialize states (what parts are visible)
     constructor(props) {
         super(props);
@@ -91,16 +187,16 @@ export default class App extends React.Component {
             // Used to keep track of visited pages - last item is the most recently visited page
             // (excluding the current one)
             back: [],
-            isLoading: undefined,
-            showAddress: false,
+
             wide: window.innerWidth > critWidth,
+            develop: false,
 
             // temporary list to overwrite
-            locationsRoutes: "unset",
-            urls: "unset",
+            locationsRoutes: undefined,
+            urls: undefined,
+            addressList: undefined,
+
             numPeople: 1,
-            currentMap: 0,
-            addressList: undefined
         };
     }
 
@@ -113,24 +209,23 @@ export default class App extends React.Component {
 
       formData.append("file", file);
       formData.append("numPeople", this.state.numPeople.toString());
-      
+      formData.append("develop", this.state.develop);
+
       var self = this;
       // for testing purposes
       const time = window.performance.now();
-      this.isLoading = true;
       axios
         .all([axios.post("/getAddresses", formData), axios.post("/findRoutes", formData)])
         .then(axios.spread(function (addresses, route) {
-            self.isLoading = true;
             // update state and getting location routes from backend
             let address = addresses.data;
             let routes = route.data
             self.setState({
                 addressList: address.placesList,
-                locationsRoutes: routes.actual, 
-                urls: routes.urls
+                locationsRoutes: routes.actual,
+                urls: routes.urls,
+                page: "step2"
             })
-            self.isLoading = false;
             // for testing purposes, tells us how long request took
             console.log(window.performance.now() - time);
         }))
@@ -144,44 +239,32 @@ export default class App extends React.Component {
         this.setState({numPeople: e.target.value})
     }
 
-    changeCurrentMap(e, changer) {
-        e.preventDefault();
-        this.setState({currentMap: ((this.state.currentMap + changer) >= 0 ? this.state.currentMap + changer : 0)})
-    }
-
     /**
-     * This updates the routing algorithm when number of canvassers 
+     * This updates the routing algorithm when number of canvassers
      * changes or address is added is applied
-     */ 
+     */
     updateRoutes(e) {
-        this.setState({locationsRoutes: 'unset'})
-        const numCanvassers = {"numPeople": this.state.numPeople};
+        this.setState({page: "loading"})
+
         // make a "package" with relevant info
-        const newAddresses = {
+        const newData = {
             data: this.state.addressList,
-            canvassers: this.state.numPeople
+            canvassers: this.state.numPeople,
+            develop: this.state.develop
         }
-        console.log(this.state.addressList)
+
         var self = this;
         axios
-            .all[axios.post("/numCanvassersChanged", numCanvassers), axios.post("/addressChanged", newAddresses)]
-            .then(axios.spread(function (addresses, route) {
-                self.isLoading = true;
+            .all([axios.post("/applyChanges", newData)])
+            .then(axios.spread(function (route) {
                 // update state and getting location routes from backend
-                let address = addresses.data;
                 let routes = route.data
                 self.setState({
-                    addressList: address.placesList,
-                    locationsRoutes: routes.actual, 
-                    urls: routes.urls
+                    locationsRoutes: routes.actual,
+                    urls: routes.urls,
+                    page: "step2"
                 })
-                self.isLoading = false;
             }))
-            // TO DO: delete when done
-            // for testing purposes
-            console.log("update")
-            console.log(this.state.addressList)
-            
             .catch(err => console.warn(err));
     }
 
@@ -199,12 +282,6 @@ export default class App extends React.Component {
         this.setState({back: this.state.back.concat(this.state.page), page: newPage})
     }
 
-    // Updates showAddress state upon click
-    toggleShowAddresses(e) {
-        e.preventDefault();
-        this.setState({showAddress: !this.state.showAddress});
-    }
-
     /**
      * adds the inputted address to the addressList
      */
@@ -212,11 +289,19 @@ export default class App extends React.Component {
         e.preventDefault();
         // TO DO: figure out a way to only have this happen WHEN the person is done entering in the address
         var newAddress = e.target.value;
+
         let toAdd = {
             address: newAddress
         }
         // add the current state to this new array using the spread
         this.setState({addressList: [...this.state.addressList, toAdd['address']]});
+    }
+
+    /**
+     * removes the inputted address from the addressList
+     */
+     removeAddress (address) {
+        // TODO
     }
 
     /**
@@ -240,29 +325,26 @@ export default class App extends React.Component {
     }
 
     render() {
-        console.log("rendered")
-        console.log(this.state.locationsRoutes)
-        console.log(this.state.numPeople)
         return (
             <div className="App">
                 <html>
                     <PageHeader/>
-
                     {/* Create a sidebar menu (manually) */}
                     <div className="sidebar">
                         <button className="button-side" onClick={() => {this.goToPage("home")}}> Home </button>
                         <button className="button-side" onClick={() => {this.goToPage("about")}}> About Us </button>
                         <button className="button-side" onClick={() => {this.goToPage("how")}}> How It Works </button>
+                        {!this.state.develop && <button className="button-side" onClick={() => {this.setState({develop: true})}}> Developer Mode </button>}
+                        {this.state.develop && <button className="button-side" onClick={() => {this.setState({develop: false})}}> User Mode </button>}
                     </div>
 
                     <div className="page">
-
                         {/* Everything in this div will be displayed in the white box */}
                         <div className="container">
 
                             {/* A back button - when user has a page in their history */}
                             {(this.state.back.length > 0) &&
-                                <button className="button-alt" onClick={() => {this.goBack()}}>Back</button>
+                                <button className="button-alt" onClick={() => {this.goBack()}}> Back </button>
                             }
 
                             {/* The Home Page */}
@@ -286,6 +368,9 @@ export default class App extends React.Component {
                                 </div>
                             }
 
+                            {/* The Loading Screen */}
+                            {(this.state.page === "loading") && <LoadingScreen /> }
+
                             {/* This is what you see after clicking the "Get Started" button */}
                             {(this.state.page === "step1") &&
                                 <div className="step1">
@@ -299,134 +384,52 @@ export default class App extends React.Component {
                                             id="file"
                                             class="inputfile"
                                             ref={(input) => { this.filesInput = input }}
-                                            onChange={e => {this.uploadFile(e); this.goToPage("step2")}}
+                                            onChange={e => {this.uploadFile(e); this.goToPage("loading")}}
                                         />
                                         <label for="file">Choose a CSV file</label>
                                     </div>
 
                                     <p className ="text"> How many canvassers do you have? </p>
-                                    <div>
-                                        <input type="number"
-                                               name="numCanvassers"
-                                               id="numCanvassers"
-                                               class="inputNum"
-                                               value={this.state.numPeople}
-                                               ref={(input) => { this.filesInput = input }}
-                                               onChange={e => {this.changeNumCanvassers(e)}}>
-                                        </input>
-                                    </div>
+                                    <ChangeCanvassers numPeople={this.state.numPeople} callback={e => {this.changeNumCanvassers(e)}} />
                                 </div>
                             }
 
-                            {/* This is what you see after selected a CSV file */}
+                            {/* This is what you see after selecting a CSV file */}
                             {(this.state.page === "step2") &&
-                                <div className="processingLocations">
-                                    {/* The Loading Screen */}
-                                    {(this.state.locationsRoutes == "unset" && this.isLoading) &&
-                                        <div className="loading">
-                                            <LoadingScreen></LoadingScreen>
-                                        </div>
+                                <div className="step2">
+                                    <SimpleTemplate title={mapPageTitle} body={mapPageBody} />
+
+                                    {/* When screen is wide side by side map and editor*/}
+                                    {this.state.wide &&
+                                        <table className="App-header">
+                                            <tr className="App-row">
+                                                <th className="App-Sides" id="mapBox">
+                                                    <DisplayMap locationsRoutes={this.state.locationsRoutes} />
+                                                </th>
+                                                <th className="App-Sides">
+                                                    <DisplayEditingAndSharing
+                                                        addressList={this.state.addressList}  removeAddress={this.removeAddress}
+                                                        addAddress={e => {this.addAddress(e)}}
+                                                        numPeople={this.state.numPeople}  changeNumCanvassers={e => {this.changeNumCanvassers(e)}}
+                                                        updateRoutes={e => {this.updateRoutes(e)}}
+                                                        urls={this.state.urls}
+                                                    />
+                                                </th>
+                                            </tr>
+                                        </table>
                                     }
-                                    {(this.state.locationsRoutes != "unset") &&
-                                        <div className="step2">
-                                            <SimpleTemplate title={mapPageTitle} body={mapPageBody} />
 
-                                            {/* Display Map  */}
-                                            {/* TODO: Show locations  */}
-                                            {/* TODO: Add Functionality to Add/Remove Addresses */}
-                                            {/* When screen is wide side by side map and editor*/}
-                                            {this.state.wide &&
-                                                <table className="App-header">
-                                                    <tr className="App-row">
-                                                        <th className="App-Sides" id="mapBox">
-                                                            <Directions coordRoute={this.state.locationsRoutes[0][0][this.state.currentMap % this.state.locationsRoutes[0][0].length]}/>
-                                                            <div className="text"> Route: {this.state.currentMap % this.state.locationsRoutes[0][0].length + 1}</div>
-                                                            <button class="button" onClick={e => {this.changeCurrentMap(e, -1)}}>Previous</button>
-                                                            <button class="button" onClick={e => {this.changeCurrentMap(e, 1)}}>Next</button>
-                                                        </th>
-                                                        <th className="App-Sides">
-                                                            {/* Add ability to adjust more paramaters of route */}
-                                                            <button class="button" onClick={e => {this.toggleShowAddresses(e)}}>View Addresses</button> 
-                                                            {/* TO DO: Fix toggle ability */}
-                                                            {(this.state.showAddress == true) && 
-                                                                <div>
-                                                                    <ul>
-                                                                        {/* print each address in the addressList */}
-                                                                        {this.state.addressList.map(function(item) {
-                                                                            return <li key={item}>{item}</li>;
-                                                                        })}
-                                                                    </ul>
-                                                                </div>
-                                                            }
-                                                            <div className="text">Add Address</div>
-                                                            {/* input box for adding an address */}
-                                                            <div class = "description">
-                                                                <input type="text"
-                                                                    name="newAddress"
-                                                                    id = "newAddress"
-                                                                    class = "inputAddress"
-                                                                    value = {this.state.address}
-                                                                    ref={(input) => { this.filesInput = input }}
-                                                                    onChange={e => {this.addAddress(e)}}>
-                                                                </input>
-                                                            </div>
-                                                            <div className="text">Remove Address</div>
-                                                            <div className="text">Number Of Canvassers:</div>
-                                                            <div class="description">
-                                                                <input type="number"
-                                                                    name="numCanvassers"
-                                                                    id="numCanvassers"
-                                                                    class="inputNum"
-                                                                    value={this.state.numPeople}
-                                                                    ref={(input) => { this.filesInput = input }}
-                                                                    onChange={e => {this.changeNumCanvassers(e)}}>
-                                                                </input>
-                                                            </div>
-                                                            <div> <button class="button" onClick={e => {this.updateRoutes(e)}}>Apply Changes</button> </div>
-                                                            <CSVLink class="button" filename="your-routes.csv" data={this.state.urls}>Route Directions</CSVLink>
-                                                        </th>
-                                                    </tr>
-                                                </table>
-                                            }
-
-                                            {/* When screen is narrow show map above editors */}
-                                            {!this.state.wide &&
-                                                <div>
-                                                    <div>
-                                                        <Directions coordRoute={this.state.locationsRoutes[0][0][this.state.currentMap % this.state.locationsRoutes[0][0].length]}/>
-                                                        <div className="text"> Route: {this.state.currentMap % this.state.locationsRoutes[0][0].length + 1}</div>
-                                                        <button class="button" onClick={e => {this.changeCurrentMap(e, -1)}}>Previous</button>
-                                                        <button class="button" onClick={e => {this.changeCurrentMap(e, 1)}}>Next</button>
-                                                    </div>
-                                                    <div>
-                                                        <button class="button" onClick={e => this.toggleShowAddresses(e)}>View Addresses</button>
-                                                        {(this.state.addressIsVisible == true) && 
-                                                            <div>
-                                                                <ul>
-                                                                    {this.state.addressList.map(function(item) {
-                                                                        return <li key={item}>{item}</li>;
-                                                                    })}
-                                                                </ul>
-                                                            </div>
-                                                        }
-                                                        <div className="text">Add Address</div>
-                                                        <div className="text">Remove Address</div>
-                                                        <div className="text">Number Of Canvassers:</div>
-                                                        <div class="description">
-                                                            <input type="number"
-                                                                name="numCanvassers"
-                                                                id="numCanvassers"
-                                                                class="inputNum"
-                                                                value={this.state.numPeople}
-                                                                ref={(input) => { this.filesInput = input }}
-                                                                onChange={e => {this.changeNumCanvassers(e)}}>
-                                                            </input>
-                                                        </div>
-                                                        <div> <button class="button" onClick={e => {this.updateRoutes(e)}}>Apply Changes</button> </div>
-                                                        <CSVLink class="button" filename="your-routes.csv" data={this.state.urls}>Route Directions</CSVLink>
-                                                    </div>
-                                                </div>
-                                            }
+                                    {/* When screen is narrow show map above editors */}
+                                    {!this.state.wide &&
+                                        <div>
+                                            <DisplayMap locationsRoutes={this.state.locationsRoutes} />
+                                            <DisplayEditingAndSharing
+                                                addressList={this.state.addressList}  removeAddress={this.removeAddress}
+                                                addAddress={e => {this.addAddress(e)}}
+                                                numPeople={this.state.numPeople}  changeNumCanvassers={e => {this.changeNumCanvassers(e)}}
+                                                updateRoutes={e => {this.updateRoutes(e)}}
+                                                urls={this.state.urls}
+                                            />
                                         </div>
                                     }
                                 </div>
