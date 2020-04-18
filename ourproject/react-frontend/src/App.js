@@ -98,7 +98,7 @@ function DisplayEditingAndSharing(props) {
 // Display list of addresses with button to toggle visibility of list
 // And buttons to remove addresses
 function DisplayAddresses(props) {
-    const [show, setShow] = useState(false)
+    const [show, setShow] = useState(false);
 
     return (
         <div>
@@ -163,6 +163,7 @@ function AddAddress(props) {
     )
 }
 
+
 /** THE MAIN SITE DRIVER **/
 
 export default class App extends React.Component {
@@ -197,6 +198,7 @@ export default class App extends React.Component {
 
             numPeople: 1,
         };
+        this.removeAddress = this.removeAddress.bind(this);
     }
 
     // Use: upload .csv file to flask/python for further analysis
@@ -300,14 +302,12 @@ export default class App extends React.Component {
      * removes the inputted address from the addressList
      */
     removeAddress (address) {
-        const index = this.state.addressList.indexOf(address);
-        
-        if (index > -1) {
-            this.setState({
-                addressList: this.state.addressList.splice(index, 1)
-            });
-        }
-        console.log(this.state.addressList)
+        const newList = this.state.addressList;
+        // filter out old address
+        const updatedList = newList.filter(item => item !== address);
+        this.setState({
+            addressList: updatedList
+        });
     }
 
     /**
@@ -331,6 +331,8 @@ export default class App extends React.Component {
     }
 
     render() {
+        console.log(this.state.addressList);
+        // console.log(this.state.)
         return (
             <div className="App">
                 <html>
