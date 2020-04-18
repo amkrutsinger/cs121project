@@ -78,7 +78,7 @@ def testingGetRoutes(numPeople):
     if numPeople is 1:
         return jsonify({"actual":[[route1]], "routeTimes": time1, "urls": [share1]})
     else:
-        return jsonify({"actual":[[route3]], "routeTimes": time3, "urls": [share3])
+        return jsonify({"actual":[[route3]], "routeTimes": time3, "urls": [share3]})
 
 
 # --- INTERFACE FUNCTIONS --- #
@@ -101,7 +101,7 @@ def getRoutes(numPeople):
     maxRouteTime, actualRoutes, routeTimes = getOutput(distances, GetLocations.coords, numPeople, sys.maxsize)
 
     routeUrls = getSharingURLS(actualRoutes, GetLocations.coords, GetLocations.placesList)
-    return jsonify({"actual":[[actualRoutes]], "routeTimes": routeTimes, "urls": [routeUrls])
+    return jsonify({"actual":[[actualRoutes]], "routeTimes": routeTimes, "urls": [routeUrls]})
 
 # Input: .csv file (passed through request)
 # Output: list of items in .csv file
