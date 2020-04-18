@@ -14,6 +14,7 @@ from ortools.constraint_solver import pywrapcp
 route1 = [[[-117.7083, 34.105748], [-117.71012, 34.10382], [-117.714692, 34.094769], [-117.705641, 34.104064], [-117.706716, 34.10235], [-117.7083, 34.105748]]]
 time1 = [779]
 share1 = ['google.com/maps/dir/34.105748,+-117.7083/34.10382,+-117.71012/34.094769,+-117.714692/34.104064,+-117.705641/34.10235,+-117.706716/34.105748,+-117.7083/']
+route1address = ['340 E Foothill Blvd, Claremont CA', '931 Butte St, Claremont CA', '675 Scripps Dr, Claremont CA', '220 Radcliffe Dr, Claremont CA', '200 Carver Dr, Claremont CA', '300 E Foothill Blvd, Claremont CA', '831 Butte St, Claremont CA', '575 Scripps Dr, Claremont CA', '120 Radcliffe Dr, Claremont CA', '100 Carver Dr, Claremont CA', '1717 N Indian Hill Blvd, Claremont CA', '1217 N Indian Hill Blvd, Claremont CA', '240 E Foothill Blvd, Claremont CA', '731 Butte St, Claremont CA', '475 Scripps Dr, Claremont CA', '20 Radcliffe Dr, Claremont CA', '50 Carver Dr, Claremont CA', '100 E Foothill Blvd, Claremont CA', '631 Butte St, Claremont CA', '275 Scripps Dr, Claremont CA', '5 Radcliffe Dr, Claremont CA', '1 Carver Dr, Claremont CA', '1917 N Indian Hill Blvd, Claremont CA', '717 N Indian Hill Blvd, Claremont CA']
 
 # With 3 Canvassers
 route3 = [[[-117.7083, 34.105748], [-117.71012, 34.10382], [-117.7083, 34.105748]], [[-117.7083, 34.105748], [-117.714692, 34.094769], [-117.7083, 34.105748]], [[-117.7083, 34.105748], [-117.706716, 34.10235], [-117.705641, 34.104064], [-117.7083, 34.105748]]]
@@ -35,6 +36,8 @@ def index():
 @app.route('/getAddresses', methods = ['POST'])
 def getAddresses():
     if request.method == 'POST':
+        if request.form['develop'] is 'true':
+            return jsonify({"placesList": route1address})
         GetLocations.placesList = getInput()
         places = GetLocations.placesList
         places = [string for string in places if string != ""]
