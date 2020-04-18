@@ -163,7 +163,6 @@ function AddAddress(props) {
     )
 }
 
-
 /** THE MAIN SITE DRIVER **/
 
 export default class App extends React.Component {
@@ -300,8 +299,15 @@ export default class App extends React.Component {
     /**
      * removes the inputted address from the addressList
      */
-     removeAddress (address) {
-        // TODO
+    removeAddress (address) {
+        const index = this.state.addressList.indexOf(address);
+        
+        if (index > -1) {
+            this.setState({
+                addressList: this.state.addressList.splice(index, 1)
+            });
+        }
+        console.log(this.state.addressList)
     }
 
     /**
@@ -408,9 +414,11 @@ export default class App extends React.Component {
                                                 </th>
                                                 <th className="App-Sides">
                                                     <DisplayEditingAndSharing
-                                                        addressList={this.state.addressList}  removeAddress={this.removeAddress}
+                                                        addressList={this.state.addressList}  
+                                                        removeAddress={this.removeAddress}
                                                         addAddress={e => {this.addAddress(e)}}
-                                                        numPeople={this.state.numPeople}  changeNumCanvassers={e => {this.changeNumCanvassers(e)}}
+                                                        numPeople={this.state.numPeople}  
+                                                        changeNumCanvassers={e => {this.changeNumCanvassers(e)}}
                                                         updateRoutes={e => {this.updateRoutes(e)}}
                                                         urls={this.state.urls}
                                                     />
