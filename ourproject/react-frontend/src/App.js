@@ -333,6 +333,8 @@ export default class App extends React.Component {
 
     render() {
         console.log(this.state.addressList);
+        console.log(this.state.locationsRoutes);
+        console.log(this.state.page);
         // console.log(this.state.)
         return (
             <div className="App">

@@ -36,12 +36,13 @@ def index():
 @app.route('/getAddresses', methods = ['POST'])
 def getAddresses():
     if request.method == 'POST':
-        if request.form['develop'] is 'true':
+        if request.form['develop'] == 'true':
             return jsonify({"placesList": route1address})
-        GetLocations.placesList = getInput()
-        places = GetLocations.placesList
-        places = [string for string in places if string != ""]
-        return jsonify({"placesList": places})
+        else:
+            GetLocations.placesList = getInput()
+            places = GetLocations.placesList
+            places = [string for string in places if string != ""]
+            return jsonify({"placesList": places})
     return render_template("index.html")
 
 # Parse user input, generate distance matrix, and print routes
@@ -49,11 +50,12 @@ def getAddresses():
 def findRoutes():
     if request.method == 'POST':
         # For developer mode - only works if numPeople is 1, 3
-        if request.form['develop'] is 'true':
+        if request.form['develop'] == 'true':
+            print("made it here")
             return testingGetRoutes(int(request.form['numPeople']))
-
-        # Read in csv file and convert to array of places
-        return getRoutes(int(request.form['numPeople']))
+        else:
+            # Read in csv file and convert to array of places
+            return getRoutes(int(request.form['numPeople']))
     return render_template("index.html")
 
 # Update numPeople or placesList and generate new routes
@@ -77,7 +79,7 @@ def testingGetRoutes(numPeople):
     if numPeople is 1:
         return jsonify({"actual":[[route1]], "routeTimes": time1, "urls": [share1]})
     else:
-        return jsonify({"actual":[[route3]], "routeTimes": time3, "urls": [share3]})
+        return jsonify({"actual":[[route3]], "routeTimes": time3, "urls": [share3])
 
 
 # --- INTERFACE FUNCTIONS --- #
@@ -100,7 +102,7 @@ def getRoutes(numPeople):
     maxRouteTime, actualRoutes, routeTimes = getOutput(distances, GetLocations.coords, numPeople, sys.maxsize)
 
     routeUrls = getSharingURLS(actualRoutes, GetLocations.coords, GetLocations.placesList)
-    return jsonify({"actual":[[actualRoutes]], "routeTimes": routeTimes, "urls": [routeUrls]})
+    return jsonify({"actual":[[actualRoutes]], "routeTimes": routeTimes, "urls": [routeUrls], "addresses": GetLocations.placesList})
 
 # Input: .csv file (passed through request)
 # Output: list of items in .csv file
