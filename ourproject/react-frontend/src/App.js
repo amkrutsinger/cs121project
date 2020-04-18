@@ -6,6 +6,7 @@ import PageHeader from './pageHeader'
 import { CSVLink } from "react-csv";
 
 import loading from './loading.gif';
+import { defaultProps } from 'recompose';
 
 // This is the width at which the screen with the map switches between side by side and vertical organization.
 const critWidth = 1000;
@@ -148,9 +149,9 @@ function AddAddress(props) {
     return (
         <div>
             <div className="text">Add Address</div>
-
+            {/* <form onSubmit = {props.handleSubmit}> */}
             {/* input box for adding an address */}
-            <div class = "description">
+            {/* <div class = "description"> */}
                 <input
                     type="text"
                     name="newAddress"
@@ -159,7 +160,9 @@ function AddAddress(props) {
                     placeholder = "Enter address"
                     onChange = {props.callback}>
                 </input>
-            </div>
+                {/* <input type='submit'/> */}
+            {/* </div> */}
+            {/* </form> */}
         </div>
 
     )
@@ -197,6 +200,7 @@ export default class App extends React.Component {
             urls: undefined,
             addressList: undefined,
 
+            newAddress: undefined,
             numPeople: 1,
         };
         this.removeAddress = this.removeAddress.bind(this);
@@ -290,12 +294,20 @@ export default class App extends React.Component {
     addAddress(e) {
         e.preventDefault();
         // TO DO: figure out a way to only have this happen WHEN the person is done entering in the address
-        var newAddress = e.target.value;
-        let toAdd = { address: newAddress }
-        if (e.key == "Enter"){
-            // add the current state to this new array
-            console.log('please work')
-            this.setState({addressList: [...this.state.addressList, toAdd['address']]})
+        var newaddress = e.target.value;
+        let toAdd = { address: newaddress }
+        if (e.key == 'Enter') {
+            const finalAddress = this.state.newAddress[-1];
+            this.setState({addressList: [...this.state.addressList, finalAddress]});
+        }
+        // add the current state to this new array
+        this.setState({addressList: [...this.state.addressList, toAdd['address']]});
+    }
+    
+    keyPressed(e) {
+        let last = {address: this.state.newAddress[-1]};
+        if (e.key == 'Enter') {
+            this.setState({addressList: [...this.state.addressList, last['address']]});
         }
     }
 
@@ -309,6 +321,16 @@ export default class App extends React.Component {
         this.setState({
             addressList: updatedList
         });
+    }
+
+    handleSubmit(e) {
+        e.preventDefault();
+        console.log("submitted");
+        var newAddress = e.target.value;
+        let toAdd = { address: newAddress }
+        // add the current state to this new array
+        this.setState({addressList: [...this.state.addressList, toAdd['address']]});
+        console.log(this.state.addressList);
     }
 
     /**
@@ -332,10 +354,8 @@ export default class App extends React.Component {
     }
 
     render() {
+        console.log(this.state.develop);
         console.log(this.state.addressList);
-        console.log(this.state.locationsRoutes);
-        console.log(this.state.page);
-        // console.log(this.state.)
         return (
             <div className="App">
                 <html>
