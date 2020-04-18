@@ -101,7 +101,7 @@ def getRoutes(numPeople):
     maxRouteTime, actualRoutes, routeTimes = getOutput(distances, GetLocations.coords, numPeople, sys.maxsize)
 
     routeUrls = getSharingURLS(actualRoutes, GetLocations.coords, GetLocations.placesList)
-    return jsonify({"actual":[[actualRoutes]], "routeTimes": routeTimes, "urls": [routeUrls], "addresses": GetLocations.placesList})
+    return jsonify({"actual":[[actualRoutes]], "routeTimes": routeTimes, "urls": [routeUrls])
 
 # Input: .csv file (passed through request)
 # Output: list of items in .csv file
