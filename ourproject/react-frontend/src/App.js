@@ -200,7 +200,6 @@ export default class App extends React.Component {
             urls: undefined,
             addressList: undefined,
 
-            newAddress: undefined,
             numPeople: 1,
         };
         this.removeAddress = this.removeAddress.bind(this);
@@ -302,13 +301,6 @@ export default class App extends React.Component {
         }
         // add the current state to this new array
         this.setState({addressList: [...this.state.addressList, toAdd['address']]});
-    }
-    
-    keyPressed(e) {
-        let last = {address: this.state.newAddress[-1]};
-        if (e.key == 'Enter') {
-            this.setState({addressList: [...this.state.addressList, last['address']]});
-        }
     }
 
     /**
