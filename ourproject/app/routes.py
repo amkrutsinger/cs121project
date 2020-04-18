@@ -51,7 +51,6 @@ def findRoutes():
     if request.method == 'POST':
         # For developer mode - only works if numPeople is 1, 3
         if request.form['develop'] == 'true':
-            print("made it here")
             return testingGetRoutes(int(request.form['numPeople']))
         else:
             # Read in csv file and convert to array of places
