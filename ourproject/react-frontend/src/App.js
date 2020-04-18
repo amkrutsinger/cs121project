@@ -142,6 +142,7 @@ function ChangeCanvassers(props) {
     )
 }
 
+
 // Display input button to add address
 function AddAddress(props) {
     return (
@@ -155,14 +156,14 @@ function AddAddress(props) {
                     name="newAddress"
                     id = "newAddress"
                     class = "inputAddress"
-                    onChange={props.callback}>
+                    placeholder = "Enter address"
+                    onChange = {props.callback}>
                 </input>
             </div>
         </div>
 
     )
 }
-
 
 /** THE MAIN SITE DRIVER **/
 
@@ -290,18 +291,18 @@ export default class App extends React.Component {
         e.preventDefault();
         // TO DO: figure out a way to only have this happen WHEN the person is done entering in the address
         var newAddress = e.target.value;
-
-        let toAdd = {
-            address: newAddress
+        let toAdd = { address: newAddress }
+        if (e.key == "Enter"){
+            // add the current state to this new array
+            console.log('please work')
+            this.setState({addressList: [...this.state.addressList, toAdd['address']]})
         }
-        // add the current state to this new array using the spread
-        this.setState({addressList: [...this.state.addressList, toAdd['address']]});
     }
 
     /**
      * removes the inputted address from the addressList
      */
-    removeAddress (address) {
+    removeAddress (address){
         const newList = this.state.addressList;
         // filter out old address
         const updatedList = newList.filter(item => item !== address);
@@ -413,6 +414,7 @@ export default class App extends React.Component {
                                             <tr className="App-row">
                                                 <th className="App-Sides" id="mapBox">
                                                     <DisplayMap locationsRoutes={this.state.locationsRoutes} />
+                                                    <text> Where does this end up displaying?</text>
                                                 </th>
                                                 <th className="App-Sides">
                                                     <DisplayEditingAndSharing
