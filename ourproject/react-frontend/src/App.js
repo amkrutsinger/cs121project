@@ -106,12 +106,12 @@ function DisplayAddresses(props) {
             {show && <button class="button" onClick={() => setShow(!show)}> Hide Addresses </button>}
             {!show && <button class="button" onClick={() => setShow(!show)}> View Addresses </button>}
             {show &&
-                <ul>
+                <ul className = 'addressList'>
                     {/* print each address in the addressList */}
                     {props.addressList.map(function(item) {
                         return (
                             <li key={item}>
-                                <div>
+                                <div align = 'left'>
                                     <input
                                         type="button"
                                         className="button"
