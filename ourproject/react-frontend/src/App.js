@@ -6,6 +6,7 @@ import PageHeader from './pageHeader'
 import { CSVLink } from "react-csv";
 
 import loading from './loading.gif';
+import { defaultProps } from 'recompose';
 
 // This is the width at which the screen with the map switches between side by side and vertical organization.
 const critWidth = 1000;
@@ -98,19 +99,19 @@ function DisplayEditingAndSharing(props) {
 // Display list of addresses with button to toggle visibility of list
 // And buttons to remove addresses
 function DisplayAddresses(props) {
-    const [show, setShow] = useState(false)
+    const [show, setShow] = useState(false);
 
     return (
         <div>
             {show && <button class="button" onClick={() => setShow(!show)}> Hide Addresses </button>}
             {!show && <button class="button" onClick={() => setShow(!show)}> View Addresses </button>}
             {show &&
-                <ul>
+                <ul className = 'addressList'>
                     {/* print each address in the addressList */}
                     {props.addressList.map(function(item) {
                         return (
                             <li key={item}>
-                                <div>
+                                <div align = 'left'>
                                     <input
                                         type="button"
                                         className="button"
@@ -142,27 +143,30 @@ function ChangeCanvassers(props) {
     )
 }
 
+
 // Display input button to add address
 function AddAddress(props) {
     return (
         <div>
             <div className="text">Add Address</div>
-
+            {/* <form onSubmit = {props.handleSubmit}> */}
             {/* input box for adding an address */}
-            <div class = "description">
+            {/* <div class = "description"> */}
                 <input
                     type="text"
                     name="newAddress"
                     id = "newAddress"
                     class = "inputAddress"
-                    onChange={props.callback}>
+                    placeholder = "Enter address"
+                    onChange = {props.callback}>
                 </input>
-            </div>
+                {/* <input type='submit'/> */}
+            {/* </div> */}
+            {/* </form> */}
         </div>
 
     )
 }
-
 
 /** THE MAIN SITE DRIVER **/
 
@@ -198,6 +202,7 @@ export default class App extends React.Component {
 
             numPeople: 1,
         };
+        this.removeAddress = this.removeAddress.bind(this);
     }
 
     // Use: upload .csv file to flask/python for further analysis
@@ -252,19 +257,19 @@ export default class App extends React.Component {
             canvassers: this.state.numPeople,
             develop: this.state.develop
         }
-
         var self = this;
         axios
-            .all([axios.post("/applyChanges", newData)])
-            .then(axios.spread(function (route) {
-                // update state and getting location routes from backend
-                let routes = route.data
+            .post("/applyChanges", newData)
+            .then(res => {
                 self.setState({
-                    locationsRoutes: routes.actual,
-                    urls: routes.urls,
-                    page: "step2"
+                    locationsRoutes: res.data.actual,
+                    urls: res.data.urls,
+                    // Might not need to update addressList because already changed in frontend
+                    // addressList: res.data.addresslist,
+                    page: "step 2"
                 })
-            }))
+                console.log(this.state.locationsRoutes);
+            })
             .catch(err => console.warn(err));
     }
 
@@ -288,20 +293,36 @@ export default class App extends React.Component {
     addAddress(e) {
         e.preventDefault();
         // TO DO: figure out a way to only have this happen WHEN the person is done entering in the address
-        var newAddress = e.target.value;
-
-        let toAdd = {
-            address: newAddress
+        var newaddress = e.target.value;
+        let toAdd = { address: newaddress }
+        if (e.key == 'Enter') {
+            const finalAddress = this.state.newAddress[-1];
+            this.setState({addressList: [...this.state.addressList, finalAddress]});
         }
-        // add the current state to this new array using the spread
+        // add the current state to this new array
         this.setState({addressList: [...this.state.addressList, toAdd['address']]});
     }
 
     /**
      * removes the inputted address from the addressList
      */
-     removeAddress (address) {
-        // TODO
+    removeAddress (address){
+        const newList = this.state.addressList;
+        // filter out old address
+        const updatedList = newList.filter(item => item !== address);
+        this.setState({
+            addressList: updatedList
+        });
+    }
+
+    handleSubmit(e) {
+        e.preventDefault();
+        console.log("submitted");
+        var newAddress = e.target.value;
+        let toAdd = { address: newAddress }
+        // add the current state to this new array
+        this.setState({addressList: [...this.state.addressList, toAdd['address']]});
+        console.log(this.state.addressList);
     }
 
     /**
@@ -325,6 +346,9 @@ export default class App extends React.Component {
     }
 
     render() {
+        // console.log(this.state.develop);
+        // console.log(this.state.addressList);
+        // console.log(this.state.locationsRoutes);
         return (
             <div className="App">
                 <html>
@@ -408,9 +432,11 @@ export default class App extends React.Component {
                                                 </th>
                                                 <th className="App-Sides">
                                                     <DisplayEditingAndSharing
-                                                        addressList={this.state.addressList}  removeAddress={this.removeAddress}
+                                                        addressList={this.state.addressList}  
+                                                        removeAddress={this.removeAddress}
                                                         addAddress={e => {this.addAddress(e)}}
-                                                        numPeople={this.state.numPeople}  changeNumCanvassers={e => {this.changeNumCanvassers(e)}}
+                                                        numPeople={this.state.numPeople}  
+                                                        changeNumCanvassers={e => {this.changeNumCanvassers(e)}}
                                                         updateRoutes={e => {this.updateRoutes(e)}}
                                                         urls={this.state.urls}
                                                     />
