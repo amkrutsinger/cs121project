@@ -257,19 +257,19 @@ export default class App extends React.Component {
             canvassers: this.state.numPeople,
             develop: this.state.develop
         }
-
         var self = this;
         axios
-            .all([axios.post("/applyChanges", newData)])
-            .then(axios.spread(function (route) {
-                // update state and getting location routes from backend
-                let routes = route.data
+            .post("/applyChanges", newData)
+            .then(res => {
                 self.setState({
-                    locationsRoutes: routes.actual,
-                    urls: routes.urls,
-                    page: "step2"
+                    locationsRoutes: res.data.actual,
+                    urls: res.data.urls,
+                    // Might not need to update addressList because already changed in frontend
+                    // addressList: res.data.addresslist,
+                    page: "step 2"
                 })
-            }))
+                console.log(this.state.locationsRoutes);
+            })
             .catch(err => console.warn(err));
     }
 
@@ -346,8 +346,9 @@ export default class App extends React.Component {
     }
 
     render() {
-        console.log(this.state.develop);
-        console.log(this.state.addressList);
+        // console.log(this.state.develop);
+        // console.log(this.state.addressList);
+        // console.log(this.state.locationsRoutes);
         return (
             <div className="App">
                 <html>
@@ -428,7 +429,6 @@ export default class App extends React.Component {
                                             <tr className="App-row">
                                                 <th className="App-Sides" id="mapBox">
                                                     <DisplayMap locationsRoutes={this.state.locationsRoutes} />
-                                                    <text> Where does this end up displaying?</text>
                                                 </th>
                                                 <th className="App-Sides">
                                                     <DisplayEditingAndSharing

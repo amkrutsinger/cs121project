@@ -15,7 +15,8 @@ route1 = [[[-117.7083, 34.105748], [-117.71012, 34.10382], [-117.714692, 34.0947
 time1 = [779]
 share1 = ['google.com/maps/dir/34.105748,+-117.7083/34.10382,+-117.71012/34.094769,+-117.714692/34.104064,+-117.705641/34.10235,+-117.706716/34.105748,+-117.7083/']
 route1address = ['340 E Foothill Blvd, Claremont CA', '931 Butte St, Claremont CA', '675 Scripps Dr, Claremont CA', '220 Radcliffe Dr, Claremont CA', '200 Carver Dr, Claremont CA', '300 E Foothill Blvd, Claremont CA', '831 Butte St, Claremont CA', '575 Scripps Dr, Claremont CA', '120 Radcliffe Dr, Claremont CA', '100 Carver Dr, Claremont CA', '1717 N Indian Hill Blvd, Claremont CA', '1217 N Indian Hill Blvd, Claremont CA', '240 E Foothill Blvd, Claremont CA', '731 Butte St, Claremont CA', '475 Scripps Dr, Claremont CA', '20 Radcliffe Dr, Claremont CA', '50 Carver Dr, Claremont CA', '100 E Foothill Blvd, Claremont CA', '631 Butte St, Claremont CA', '275 Scripps Dr, Claremont CA', '5 Radcliffe Dr, Claremont CA', '1 Carver Dr, Claremont CA', '1917 N Indian Hill Blvd, Claremont CA', '717 N Indian Hill Blvd, Claremont CA']
-
+route1new = ["340 E Foothill Blvd, Claremont CA", "931 Butte St, Claremont CA", "675 Scripps Dr, Claremont CA", "220 Radcliffe Dr, Claremont CA", "200 Carver Dr, Claremont CA", "300 E Foothill Blvd, Claremont CA", "831 Butte St, Claremont CA", "575 Scripps Dr, Claremont CA", "120 Radcliffe Dr, Claremont CA", "100 Carver Dr, Claremont CA", "1717 N Indian Hill Blvd, Claremont CA", "1217 N Indian Hill Blvd, Claremont CA", "240 E Foothill Blvd, Claremont CA", "731 Butte St, Claremont CA", "475 Scripps Dr, Claremont CA", "20 Radcliffe Dr, Claremont CA", "50 Carver Dr, Claremont CA", "100 E Foothill Blvd, Claremont CA", "631 Butte St, Claremont CA", "275 Scripps Dr, Claremont CA", "5 Radcliffe Dr, Claremont CA", "1 Carver Dr, Claremont CA", "1917 N Indian Hill Blvd, Claremont CA", "717 N Indian Hill Blvd, Claremont CA", "681 Claremont Blvd, Claremont CA"]
+updated = [[[-117.7083, 34.105748], [-117.71012, 34.10382], [-117.714692, 34.094769], [-117.705641, 34.104064], [-117.706716, 34.10235], [-117.7083, 34.105748], [-117.7083, 34.107748]]]
 # With 3 Canvassers
 route3 = [[[-117.7083, 34.105748], [-117.71012, 34.10382], [-117.7083, 34.105748]], [[-117.7083, 34.105748], [-117.714692, 34.094769], [-117.7083, 34.105748]], [[-117.7083, 34.105748], [-117.706716, 34.10235], [-117.705641, 34.104064], [-117.7083, 34.105748]]]
 time3 = [371, 569, 350]
@@ -65,7 +66,7 @@ def applyChanges():
 
         # For developer mode - only works if numPeople is 1, 3
         if data['develop']:
-            return testingGetRoutes(int(data['canvassers']))
+            return testNewRoute(int(data['canvassers']))
 
         GetLocations.placesList = list(data['data'])
         return getRoutes(int(data['canvassers']))
@@ -77,9 +78,15 @@ def applyChanges():
 def testingGetRoutes(numPeople):
     if numPeople is 1:
         return jsonify({"actual":[[route1]], "routeTimes": time1, "urls": [share1]})
+        # return jsonify({"actual":[[route1]], "routeTimes": time1, "urls": [share1], "address": route1address})
     else:
         return jsonify({"actual":[[route3]], "routeTimes": time3, "urls": [share3]})
+        # return jsonify({"actual":[[route3]], "routeTimes": time3, "urls": [share3], "address": [route1address]})
 
+def testNewRoute(numPeople): 
+    if numPeople is 1:
+        return jsonify({"actual":[[updated]], "routeTimes": time1, "urls": [share1]})
+        # return jsonify({"actual":[[updated]], "routeTimes": time1, "urls": [share1], "address": route1address})
 
 # --- INTERFACE FUNCTIONS --- #
 
@@ -101,7 +108,8 @@ def getRoutes(numPeople):
     maxRouteTime, actualRoutes, routeTimes = getOutput(distances, GetLocations.coords, numPeople, sys.maxsize)
 
     routeUrls = getSharingURLS(actualRoutes, GetLocations.coords, GetLocations.placesList)
-    return jsonify({"actual":[[actualRoutes]], "routeTimes": routeTimes, "urls": [routeUrls]})
+    # return jsonify({"actual":[[actualRoutes]], "routeTimes": routeTimes, "urls": [routeUrls]})
+    return jsonify({"actual":[[actualRoutes]], "routeTimes": routeTimes, "urls": [routeUrls], "address": GetLocations.placesList})
 
 # Input: .csv file (passed through request)
 # Output: list of items in .csv file
