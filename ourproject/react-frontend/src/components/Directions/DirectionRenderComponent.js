@@ -130,7 +130,6 @@ class DirectionRenderComponent extends Component {
             options={{
               polylineOptions: {
                 strokeColor: this.props.strokeColor,
-                strokeOpacity: 0.4,
                 strokeOpacity: 0.8,
                 strokeWeight: 4
               },
