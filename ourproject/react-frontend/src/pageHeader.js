@@ -1,7 +1,6 @@
 import React from 'react'
 import './pageHeader.css'
 import logo from './logo.png';
-import Sidebar from "./Sidebar";
 
 // Display our PageHeader - This includes
 //  -- upper left icon

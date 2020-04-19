@@ -6,7 +6,6 @@ import PageHeader from './pageHeader'
 import { CSVLink } from "react-csv";
 
 import loading from './loading.gif';
-import { defaultProps } from 'recompose';
 
 // This is the width at which the screen with the map switches between side by side and vertical organization.
 const critWidth = 1000;
@@ -295,7 +294,7 @@ export default class App extends React.Component {
         // TO DO: figure out a way to only have this happen WHEN the person is done entering in the address
         var newaddress = e.target.value;
         let toAdd = { address: newaddress }
-        if (e.key == 'Enter') {
+        if (e.key === 'Enter') {
             const finalAddress = this.state.newAddress[-1];
             this.setState({addressList: [...this.state.addressList, finalAddress]});
         }
