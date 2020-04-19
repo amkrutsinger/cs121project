@@ -294,6 +294,7 @@ export default class App extends React.Component {
         // TO DO: figure out a way to only have this happen WHEN the person is done entering in the address
         var newaddress = e.target.value;
         let toAdd = { address: newaddress }
+        // TO DO: fix this!
         if (e.key === 'Enter') {
             const finalAddress = this.state.newAddress[-1];
             this.setState({addressList: [...this.state.addressList, finalAddress]});
