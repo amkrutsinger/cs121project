@@ -157,13 +157,12 @@ function AddAddress(props) {
                     id = "newAddress"
                     class = "inputAddress"
                     placeholder = "Enter address"
-                    onChange = {props.callback}>
+                    onKeyPress = {props.callback}>
                 </input>
                 {/* <input type='submit'/> */}
             {/* </div> */}
             {/* </form> */}
         </div>
-
     )
 }
 
@@ -272,35 +271,6 @@ export default class App extends React.Component {
             .catch(err => console.warn(err));
     }
 
-    /**
-     * This updates the routing algorithm when number of canvassers
-     * changes or address is added is applied
-     */
-    // updateRoutes(e) {
-    //     this.setState({page: "loading"})
-    //
-    //     // make a "package" with relevant info
-    //     const newData = {
-    //         data: this.state.addressList,
-    //         canvassers: this.state.numPeople,
-    //         develop: this.state.develop
-    //     }
-    //     var self = this;
-    //     axios
-    //         .post("/applyChanges", newData)
-    //         .then(res => {
-    //             self.setState({
-    //                 locationsRoutes: res.data.actual,
-    //                 urls: res.data.urls,
-    //                 // Might not need to update addressList because already changed in frontend
-    //                 // addressList: res.data.addresslist,
-    //                 page: "step 2"
-    //             })
-    //             console.log(this.state.locationsRoutes);
-    //         })
-    //         .catch(err => console.warn(err));
-    // }
-
     // Used for back button
     // Sends user to latest page in back array and then updates back array to remove that value
     goBack() {
@@ -320,16 +290,11 @@ export default class App extends React.Component {
      */
     addAddress(e) {
         e.preventDefault();
-        // TO DO: figure out a way to only have this happen WHEN the person is done entering in the address
-        var newaddress = e.target.value;
-        let toAdd = { address: newaddress }
-        // TO DO: fix this!
+        
+        let newAddress = e.target.value
         if (e.key === 'Enter') {
-            const finalAddress = this.state.newAddress[-1];
-            this.setState({addressList: [...this.state.addressList, finalAddress]});
+            this.setState({addressList: [...this.state.addressList, newAddress]})
         }
-        // add the current state to this new array
-        this.setState({addressList: [...this.state.addressList, toAdd['address']]});
     }
 
     /**
