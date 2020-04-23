@@ -256,21 +256,50 @@ export default class App extends React.Component {
             canvassers: this.state.numPeople,
             develop: this.state.develop
         }
+
         var self = this;
         axios
-            .post("/applyChanges", newData)
-            .then(res => {
+            .all([axios.post("/applyChanges", newData)])
+            .then(axios.spread(function (route) {
+                // update state and getting location routes from backend
+                let routes = route.data
                 self.setState({
-                    locationsRoutes: res.data.actual,
-                    urls: res.data.urls,
-                    // Might not need to update addressList because already changed in frontend
-                    // addressList: res.data.addresslist,
-                    page: "step 2"
+                    locationsRoutes: routes.actual,
+                    urls: routes.urls,
+                    page: "step2"
                 })
-                console.log(this.state.locationsRoutes);
-            })
+            }))
             .catch(err => console.warn(err));
     }
+
+    /**
+     * This updates the routing algorithm when number of canvassers
+     * changes or address is added is applied
+     */
+    // updateRoutes(e) {
+    //     this.setState({page: "loading"})
+    //
+    //     // make a "package" with relevant info
+    //     const newData = {
+    //         data: this.state.addressList,
+    //         canvassers: this.state.numPeople,
+    //         develop: this.state.develop
+    //     }
+    //     var self = this;
+    //     axios
+    //         .post("/applyChanges", newData)
+    //         .then(res => {
+    //             self.setState({
+    //                 locationsRoutes: res.data.actual,
+    //                 urls: res.data.urls,
+    //                 // Might not need to update addressList because already changed in frontend
+    //                 // addressList: res.data.addresslist,
+    //                 page: "step 2"
+    //             })
+    //             console.log(this.state.locationsRoutes);
+    //         })
+    //         .catch(err => console.warn(err));
+    // }
 
     // Used for back button
     // Sends user to latest page in back array and then updates back array to remove that value
@@ -432,10 +461,10 @@ export default class App extends React.Component {
                                                 </th>
                                                 <th className="App-Sides">
                                                     <DisplayEditingAndSharing
-                                                        addressList={this.state.addressList}  
+                                                        addressList={this.state.addressList}
                                                         removeAddress={this.removeAddress}
                                                         addAddress={e => {this.addAddress(e)}}
-                                                        numPeople={this.state.numPeople}  
+                                                        numPeople={this.state.numPeople}
                                                         changeNumCanvassers={e => {this.changeNumCanvassers(e)}}
                                                         updateRoutes={e => {this.updateRoutes(e)}}
                                                         urls={this.state.urls}
