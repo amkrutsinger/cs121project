@@ -79,7 +79,7 @@ function DisplayMap(props) {
 function DisplayEditingAndSharing(props) {
     return (
         <div>
-            <DisplayAddresses addressList={props.addressList} callback={props.removeAddress} />
+            <DisplayAddresses addressList={props.addressList} removeAddress={props.removeAddress} editAddress={props.editAddress} />
             <AddAddress callback={props.addAddress} />
 
             <div className="text">Number Of Canvassers:</div>
@@ -110,16 +110,11 @@ function DisplayAddresses(props) {
                     {props.addressList.map(function(item) {
                         return (
                             <li key={item}>
-                                <div align = 'left'>
-                                    <input
-                                        type="button"
-                                        className="button"
-                                        id="removeAddress"
-                                        value="-"
-                                        onClick={() => {props.callback(item)}}>
-                                    </input>
-                                    &nbsp; {item}
-                                </div>
+                                <DisplayAddress
+                                    address={item}
+                                    removeAddress={props.removeAddress}
+                                    editAddress={props.editAddress}
+                                />
                             </li>
                         )
                     })}
@@ -128,6 +123,32 @@ function DisplayAddresses(props) {
         </div>
     )
 }
+
+
+// Display address, Edit Address, and Delete Address
+function DisplayAddress(props) {
+    const [edit, setEdit] = useState(false);
+
+    return (
+        <div align = 'left'>
+            <button class="button" onClick={() => setEdit(!edit)}> - </button>
+            &nbsp;
+            {!edit && props.address}
+
+            {edit &&
+                <input type="text" defaultValue={props.address} onKeyPress = {(e) => {
+                    if (e.key === 'Enter') {
+                        props.editAddress(e, props.address);
+                        setEdit(!edit)
+                    }
+                }} />
+            }
+
+            {edit && <button class="button" onClick={() => {props.removeAddress(props.address)}}> Delete </button> }
+        </div>
+    )
+}
+
 
 // Display a button to update the number of canvassers
 function ChangeCanvassers(props) {
@@ -148,20 +169,15 @@ function AddAddress(props) {
     return (
         <div>
             <div className="text">Add Address</div>
-            {/* <form onSubmit = {props.handleSubmit}> */}
-            {/* input box for adding an address */}
-            {/* <div class = "description"> */}
-                <input
-                    type="text"
-                    name="newAddress"
-                    id = "newAddress"
-                    class = "inputAddress"
-                    placeholder = "Enter address"
-                    onKeyPress = {props.callback}>
-                </input>
-                {/* <input type='submit'/> */}
-            {/* </div> */}
-            {/* </form> */}
+
+            <input
+                type="text"
+                name="newAddress"
+                id = "newAddress"
+                class = "inputAddress"
+                placeholder = "Enter address"
+                onKeyPress = {props.callback}>
+            </input>
         </div>
     )
 }
@@ -200,7 +216,9 @@ export default class App extends React.Component {
 
             numPeople: 1,
         };
+        
         this.removeAddress = this.removeAddress.bind(this);
+        this.editAddress = this.editAddress.bind(this)
     }
 
     // Use: upload .csv file to flask/python for further analysis
@@ -290,8 +308,9 @@ export default class App extends React.Component {
      */
     addAddress(e) {
         e.preventDefault();
-        
+
         let newAddress = e.target.value
+
         if (e.key === 'Enter') {
             this.setState({addressList: [...this.state.addressList, newAddress]})
         }
@@ -306,6 +325,23 @@ export default class App extends React.Component {
         const updatedList = newList.filter(item => item !== address);
         this.setState({
             addressList: updatedList
+        });
+    }
+
+    /**
+     * edits the inputted address in the addressList (preserving list order)
+     */
+    editAddress (e, address){
+        e.preventDefault()
+        const newList = this.state.addressList;
+        var index = newList.indexOf(address);
+
+        if (~index) {
+            newList[index] = e.target.value;
+        }
+
+        this.setState({
+            addressList: newList
         });
     }
 
@@ -426,11 +462,9 @@ export default class App extends React.Component {
                                                 </th>
                                                 <th className="App-Sides">
                                                     <DisplayEditingAndSharing
-                                                        addressList={this.state.addressList}
-                                                        removeAddress={this.removeAddress}
+                                                        addressList={this.state.addressList} removeAddress={this.removeAddress} editAddress={this.editAddress}
                                                         addAddress={e => {this.addAddress(e)}}
-                                                        numPeople={this.state.numPeople}
-                                                        changeNumCanvassers={e => {this.changeNumCanvassers(e)}}
+                                                        numPeople={this.state.numPeople} changeNumCanvassers={e => {this.changeNumCanvassers(e)}}
                                                         updateRoutes={e => {this.updateRoutes(e)}}
                                                         urls={this.state.urls}
                                                     />
@@ -444,7 +478,7 @@ export default class App extends React.Component {
                                         <div>
                                             <DisplayMap locationsRoutes={this.state.locationsRoutes} />
                                             <DisplayEditingAndSharing
-                                                addressList={this.state.addressList}  removeAddress={this.removeAddress}
+                                                addressList={this.state.addressList}  removeAddress={this.removeAddress} editAddress={this.editAddress}
                                                 addAddress={e => {this.addAddress(e)}}
                                                 numPeople={this.state.numPeople}  changeNumCanvassers={e => {this.changeNumCanvassers(e)}}
                                                 updateRoutes={e => {this.updateRoutes(e)}}
