@@ -1,7 +1,5 @@
 import React, { Component } from "react";
 import './Menu.css';
-import logo from './logo.png';
-import PageHeader from './pageHeader.js'
 
 // modified from CodePen React Slide In Menu from Lakston
 class SideBarRoutes extends React.Component {
