@@ -75,16 +75,14 @@ function DisplayMap(props) {
     )
 }
 
-// Displays all components on the right/bottom side of the step2 page
+// Displays all components on the right/bottom side of the Step 2 (Map) page
 function DisplayEditingAndSharing(props) {
     return (
-        <div>
+        <div className="rightSide">
             <DisplayAddresses addressList={props.addressList} removeAddress={props.removeAddress} editAddress={props.editAddress} />
+
             <AddAddress callback={props.addAddress} />
-
-            <div className="text">Number Of Canvassers:</div>
-            <ChangeCanvassers numPeople={props.numPeople} callback={props.changeNumCanvassers} />
-
+            <ChangeCanvassers numPeople={props.numPeople} callback={props.changeNumCanvassers} prompt="Number of Canvassers:" />
             <div> <button class="button" onClick={props.updateRoutes}>Apply Changes</button> </div>
 
             <CSVLink class="button" filename="your-routes.csv" data={props.urls}>Route Directions</CSVLink>
@@ -95,8 +93,7 @@ function DisplayEditingAndSharing(props) {
 
 /** HELPER FUNCTIONS FOR DISPLAY_EDITING_AND_SHARING **/
 
-// Display list of addresses with button to toggle visibility of list
-// And buttons to remove addresses
+// Display list of addresses formatted using DisplayAddress template
 function DisplayAddresses(props) {
     const [show, setShow] = useState(false);
 
@@ -125,18 +122,18 @@ function DisplayAddresses(props) {
 }
 
 
-// Display address, Edit Address, and Delete Address
+// Display address and buttons to edit and delete that address
 function DisplayAddress(props) {
     const [edit, setEdit] = useState(false);
 
     return (
-        <div align = 'left'>
+        <div align='left'>
             <button class="button" onClick={() => setEdit(!edit)}> - </button>
             &nbsp;
             {!edit && props.address}
 
             {edit &&
-                <input type="text" defaultValue={props.address} onKeyPress = {(e) => {
+                <input type="text" class="inputField" defaultValue={props.address} onKeyPress = {(e) => {
                     if (e.key === 'Enter') {
                         props.editAddress(e, props.address);
                         setEdit(!edit)
@@ -153,13 +150,16 @@ function DisplayAddress(props) {
 // Display a button to update the number of canvassers
 function ChangeCanvassers(props) {
     return (
-        <input type="number"
-               name="numCanvassers"
-               id="numCanvassers"
-               class="inputNum"
-               value={props.numPeople}
-               onChange={props.callback}>
-        </input>
+        <div>
+            <div className="text"> {props.prompt} </div>
+            <input type="number"
+                name="numCanvassers"
+                id="numCanvassers"
+                class="inputField"
+                value={props.numPeople}
+                onChange={props.callback}>
+            </input>
+        </div>
     )
 }
 
@@ -172,9 +172,7 @@ function AddAddress(props) {
 
             <input
                 type="text"
-                name="newAddress"
-                id = "newAddress"
-                class = "inputAddress"
+                class = "inputField"
                 placeholder = "Enter address"
                 onKeyPress = {props.callback}>
             </input>
@@ -216,7 +214,7 @@ export default class App extends React.Component {
 
             numPeople: 1,
         };
-        
+
         this.removeAddress = this.removeAddress.bind(this);
         this.editAddress = this.editAddress.bind(this)
     }
@@ -443,8 +441,7 @@ export default class App extends React.Component {
                                         <label for="file">Choose a CSV file</label>
                                     </div>
 
-                                    <p className ="text"> How many canvassers do you have? </p>
-                                    <ChangeCanvassers numPeople={this.state.numPeople} callback={e => {this.changeNumCanvassers(e)}} />
+                                    <ChangeCanvassers numPeople={this.state.numPeople} callback={e => {this.changeNumCanvassers(e)}} prompt="How many canvassers do you have?" />
                                 </div>
                             }
 
