@@ -81,7 +81,7 @@ function DisplayEditingAndSharing(props) {
         <div className="rightSide">
             <DisplayAddresses addressList={props.addressList} removeAddress={props.removeAddress} editAddress={props.editAddress} />
 
-            <AddAddress callback={props.addAddress} />
+            <AddAddress addAddress={props.addAddress} />
             <ChangeCanvassers numPeople={props.numPeople} callback={props.changeNumCanvassers} prompt="Number of Canvassers:" />
             <div> <button class="button" onClick={props.updateRoutes}>Apply Changes</button> </div>
 
@@ -168,16 +168,22 @@ function AddAddress(props) {
         <div>
             <div className="text">Add Address</div>
 
-            <input
-                type="text"
-                id = "newAddress"
-                class="inputField"
-                placeholder="Enter address"
-                onKeyPress={props.callback}>
-            </input>
+            <input type="text" class="inputField" placeholder="Enter address" onKeyPress = {(e) => {
+                if (e.key === 'Enter') {
+                    props.addAddress(e);
+                }
+            }} />
         </div>
     )
 }
+
+// <input
+//     type="text"
+//     id = "newAddress"
+//     class="inputField"
+//     placeholder="Enter address"
+//     onKeyPress={props.callback}>
+// </input>
 
 /** THE MAIN SITE DRIVER **/
 
@@ -220,6 +226,7 @@ export default class App extends React.Component {
         this.removeAddress = this.removeAddress.bind(this)
         this.editAddress = this.editAddress.bind(this)
         this.updateRoutes = this.updateRoutes.bind(this)
+        this.addAddress = this.addAddress.bind(this)
     }
 
     /*
@@ -318,13 +325,15 @@ export default class App extends React.Component {
             Action: adds address to addressList
     **/
     addAddress(e) {
-        e.preventDefault();
+        e.preventDefault()
+        this.setState({addressList: [...this.state.addressList, e.target.value]})
 
-        let newAddress = e.target.value
 
-        if (e.key === 'Enter') {
-            this.setState({addressList: [...this.state.addressList, newAddress]})
-        }
+        // let newAddress = e.target.value
+        //
+        // if (e.key === 'Enter') {
+        //     this.setState({addressList: [...this.state.addressList, newAddress]})
+        // }
     }
 
     /*
@@ -464,7 +473,7 @@ export default class App extends React.Component {
                                                 <th className="App-Sides">
                                                     <DisplayEditingAndSharing
                                                         addressList={this.state.addressList} removeAddress={this.removeAddress} editAddress={this.editAddress}
-                                                        addAddress={e => {this.addAddress(e)}}
+                                                        addAddress={this.addAddress}
                                                         numPeople={this.state.numPeople} changeNumCanvassers={e => {this.changeNumCanvassers(e)}}
                                                         updateRoutes={this.updateRoutes}
                                                         urls={this.state.urls}
@@ -480,7 +489,7 @@ export default class App extends React.Component {
                                             <DisplayMap locationsRoutes={this.state.locationsRoutes} />
                                             <DisplayEditingAndSharing
                                                 addressList={this.state.addressList}  removeAddress={this.removeAddress} editAddress={this.editAddress}
-                                                addAddress={e => {this.addAddress(e)}}
+                                                addAddress={this.addAddress}
                                                 numPeople={this.state.numPeople}  changeNumCanvassers={e => {this.changeNumCanvassers(e)}}
                                                 updateRoutes={this.updateRoutes}
                                                 urls={this.state.urls}
