@@ -78,15 +78,12 @@ def applyChanges():
 def testingGetRoutes(numPeople):
     if numPeople is 1:
         return jsonify({"actual":[[route1]], "routeTimes": time1, "urls": [share1]})
-        # return jsonify({"actual":[[route1]], "routeTimes": time1, "urls": [share1], "address": route1address})
     else:
         return jsonify({"actual":[[route3]], "routeTimes": time3, "urls": [share3]})
-        # return jsonify({"actual":[[route3]], "routeTimes": time3, "urls": [share3], "address": [route1address]})
 
-def testNewRoute(numPeople): 
+def testNewRoute(numPeople):
     if numPeople is 1:
         return jsonify({"actual":[[updated]], "routeTimes": time1, "urls": [share1]})
-        # return jsonify({"actual":[[updated]], "routeTimes": time1, "urls": [share1], "address": route1address})
 
 # --- INTERFACE FUNCTIONS --- #
 

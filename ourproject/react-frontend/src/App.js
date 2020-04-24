@@ -75,16 +75,14 @@ function DisplayMap(props) {
     )
 }
 
-// Displays all components on the right/bottom side of the step2 page
+// Displays all components on the right/bottom side of the Step 2 (Map) page
 function DisplayEditingAndSharing(props) {
     return (
-        <div>
-            <DisplayAddresses addressList={props.addressList} callback={props.removeAddress} />
+        <div className="rightSide">
+            <DisplayAddresses addressList={props.addressList} removeAddress={props.removeAddress} editAddress={props.editAddress} />
+
             <AddAddress callback={props.addAddress} />
-
-            <div className="text">Number Of Canvassers:</div>
-            <ChangeCanvassers numPeople={props.numPeople} callback={props.changeNumCanvassers} />
-
+            <ChangeCanvassers numPeople={props.numPeople} callback={props.changeNumCanvassers} prompt="Number of Canvassers:" />
             <div> <button class="button" onClick={props.updateRoutes}>Apply Changes</button> </div>
 
             <CSVLink class="button" filename="your-routes.csv" data={props.urls}>Route Directions</CSVLink>
@@ -95,8 +93,7 @@ function DisplayEditingAndSharing(props) {
 
 /** HELPER FUNCTIONS FOR DISPLAY_EDITING_AND_SHARING **/
 
-// Display list of addresses with button to toggle visibility of list
-// And buttons to remove addresses
+// Display list of addresses formatted using DisplayAddress template
 function DisplayAddresses(props) {
     const [show, setShow] = useState(false);
 
@@ -106,20 +103,14 @@ function DisplayAddresses(props) {
             {!show && <button class="button" onClick={() => setShow(!show)}> View Addresses </button>}
             {show &&
                 <ul className = 'addressList'>
-                    {/* print each address in the addressList */}
                     {props.addressList.map(function(item) {
                         return (
                             <li key={item}>
-                                <div align = 'left'>
-                                    <input
-                                        type="button"
-                                        className="button"
-                                        id="removeAddress"
-                                        value="-"
-                                        onClick={() => {props.callback(item)}}>
-                                    </input>
-                                    &nbsp; {item}
-                                </div>
+                                <DisplayAddress
+                                    address={item}
+                                    removeAddress={props.removeAddress}
+                                    editAddress={props.editAddress}
+                                />
                             </li>
                         )
                     })}
@@ -129,41 +120,62 @@ function DisplayAddresses(props) {
     )
 }
 
-// Display a button to update the number of canvassers
-function ChangeCanvassers(props) {
+
+// Display address and buttons to edit and delete that address
+function DisplayAddress(props) {
+    const [edit, setEdit] = useState(false);
+
     return (
-        <input type="number"
-               name="numCanvassers"
-               id="numCanvassers"
-               class="inputNum"
-               value={props.numPeople}
-               onChange={props.callback}>
-        </input>
+        <div align='left'>
+            <button class="button" onClick={() => setEdit(!edit)}> - </button>
+            &nbsp;
+            {!edit && props.address}
+
+            {edit &&
+                <input type="text" class="inputField" defaultValue={props.address} onKeyPress = {(e) => {
+                    if (e.key === 'Enter') {
+                        props.editAddress(e, props.address);
+                        setEdit(!edit)
+                    }
+                }} />
+            }
+
+            {edit && <button class="button" onClick={() => {props.removeAddress(props.address)}}> Delete </button> }
+        </div>
     )
 }
 
 
-// Display input button to add address
+// Display a button to update the number of canvassers
+function ChangeCanvassers(props) {
+    return (
+        <div>
+            <div className="text"> {props.prompt} </div>
+            <input type="number"
+                id="numCanvassers"
+                class="inputField"
+                value={props.numPeople}
+                onChange={props.callback}>
+            </input>
+        </div>
+    )
+}
+
+
+// Display a button to add additional addresses
 function AddAddress(props) {
     return (
         <div>
             <div className="text">Add Address</div>
-            {/* <form onSubmit = {props.handleSubmit}> */}
-            {/* input box for adding an address */}
-            {/* <div class = "description"> */}
-                <input
-                    type="text"
-                    name="newAddress"
-                    id = "newAddress"
-                    class = "inputAddress"
-                    placeholder = "Enter address"
-                    onChange = {props.callback}>
-                </input>
-                {/* <input type='submit'/> */}
-            {/* </div> */}
-            {/* </form> */}
-        </div>
 
+            <input
+                type="text"
+                id = "newAddress"
+                class="inputField"
+                placeholder="Enter address"
+                onKeyPress={props.callback}>
+            </input>
+        </div>
     )
 }
 
@@ -171,15 +183,18 @@ function AddAddress(props) {
 
 export default class App extends React.Component {
 
-    // Overview:
-    //    Welcome: introductory message, get started button
-    //    Step 1: Upload CSV file
-    //    Step 2: Add/Remove addresses
-    //    Step 3: Set Parameters (e.g. number of campaigners)
-    //    Loading page (depending on time of algorithm)
-    //    Result: display path, statistics
+    /*
+        Site Journey Overview:
+        Home: Introductory Message and Get Started Button
+        Step 1: Upload CSV File and Select Number of Canvassers
+        Loading Page
+        Step 2: View Final Routes and Make Changes
+    **/
 
-    // Initialize states (what parts are visible)
+
+    /*
+        Constructor - Initialize States and Bind Functions
+    **/
     constructor(props) {
         super(props);
         this.state =
@@ -191,37 +206,42 @@ export default class App extends React.Component {
             // (excluding the current one)
             back: [],
 
+            // If wide Map and Buttons are displayed side-by-side
+            // Otherwise, they are stacked
             wide: window.innerWidth > critWidth,
+
+            // Avoid API calls if develop button is clicked
             develop: false,
 
-            // temporary list to overwrite
-            locationsRoutes: undefined,
-            urls: undefined,
-            addressList: undefined,
-
-            numPeople: 1,
+            // Default number of canvassers is one
+            numPeople: 1
         };
-        this.removeAddress = this.removeAddress.bind(this);
+
+        this.removeAddress = this.removeAddress.bind(this)
+        this.editAddress = this.editAddress.bind(this)
+        this.updateRoutes = this.updateRoutes.bind(this)
     }
 
-    // Use: upload .csv file to flask/python for further analysis
-    // Taken from Stack Overflow
+    /*
+        uploadFile -
+            Inputs: event handler (this allows us to see the inputted file)
+            Action: Updates state to display route for inputted locations and numPeople
+            Source: Stack Overflow
+    **/
     uploadFile(e) {
-      e.preventDefault();
-      let file = e.target.files[0];
-      const formData = new FormData();
+      e.preventDefault()
+      let file = e.target.files[0]
+      const formData = new FormData()
 
       formData.append("file", file);
-      formData.append("numPeople", this.state.numPeople.toString());
+      formData.append("numPeople", this.state.numPeople.toString())
       formData.append("develop", this.state.develop);
 
-      var self = this;
-      // for testing purposes
-      const time = window.performance.now();
+      var self = this
       axios
         .all([axios.post("/getAddresses", formData), axios.post("/findRoutes", formData)])
         .then(axios.spread(function (addresses, route) {
-            // update state and getting location routes from backend
+            // update state with results from backend (flask/python)
             let address = addresses.data;
             let routes = route.data
             self.setState({
@@ -230,82 +250,88 @@ export default class App extends React.Component {
                 urls: routes.urls,
                 page: "step2"
             })
-            // for testing purposes, tells us how long request took
-            console.log(window.performance.now() - time);
         }))
-        .catch(err => console.warn(err));
+        .catch(err => console.warn(err))
     }
 
-    // This allows the input field for the number of canvassers to change
-    // and updates the state accordingly
+    /*
+        changeNumCanvassers -
+            Input: an event handler (lets us see inputted number)
+            Action: sets numPeople to inputted number
+    **/
     changeNumCanvassers(e) {
-        e.preventDefault();
+        e.preventDefault()
         this.setState({numPeople: e.target.value})
     }
 
-    /**
-     * This updates the routing algorithm when number of canvassers
-     * changes or address is added is applied
-     */
-    updateRoutes(e) {
+    /*
+        updateRoutes -
+            Action: Updates state to display route for current addressList and numPeople
+    **/
+    updateRoutes() {
         this.setState({page: "loading"})
 
-        // make a "package" with relevant info
+        // make a "package" with info to send to backend (flask/python)
         const newData = {
             data: this.state.addressList,
             canvassers: this.state.numPeople,
             develop: this.state.develop
         }
-        var self = this;
+
+        var self = this
         axios
-            .post("/applyChanges", newData)
-            .then(res => {
+            .all([axios.post("/applyChanges", newData)])
+            .then(axios.spread(function (route) {
+                // update state with results from backend (flask/python)
+                let routes = route.data
                 self.setState({
-                    locationsRoutes: res.data.actual,
-                    urls: res.data.urls,
-                    // Might not need to update addressList because already changed in frontend
-                    // addressList: res.data.addresslist,
-                    page: "step 2"
+                    locationsRoutes: routes.actual,
+                    urls: routes.urls,
+                    page: "step2"
                 })
-                console.log(this.state.locationsRoutes);
-            })
-            .catch(err => console.warn(err));
+            }))
+            .catch(err => console.warn(err))
     }
 
-    // Used for back button
-    // Sends user to latest page in back array and then updates back array to remove that value
+    /*
+        goBack -
+            Action: sends user to the previously visited page
+    **/
     goBack() {
         let array = this.state.back.slice()   // make a separate copy of the array
         let priorPage = array.splice(array.length - 1, 1)
         this.setState({page: priorPage[0], back: array})
     }
 
-    // Performs all functions necessary to change page displayed
-    // (updates page and back)
+    /*
+        goToPage -
+            Input: a newpage
+            Action: sends user to that page
+    **/
     goToPage(newPage) {
         this.setState({back: this.state.back.concat(this.state.page), page: newPage})
     }
 
-    /**
-     * adds the inputted address to the addressList
-     */
+    /*
+        addAddress -
+            Input: an event handler (lets us see inputted address)
+            Action: adds address to addressList
+    **/
     addAddress(e) {
         e.preventDefault();
-        // TO DO: figure out a way to only have this happen WHEN the person is done entering in the address
-        var newaddress = e.target.value;
-        let toAdd = { address: newaddress }
-        // TO DO: fix this!
+
+        let newAddress = e.target.value
+
         if (e.key === 'Enter') {
-            const finalAddress = this.state.newAddress[-1];
-            this.setState({addressList: [...this.state.addressList, finalAddress]});
+            this.setState({addressList: [...this.state.addressList, newAddress]})
         }
-        // add the current state to this new array
-        this.setState({addressList: [...this.state.addressList, toAdd['address']]});
     }
 
-    /**
-     * removes the inputted address from the addressList
-     */
+    /*
+        removeAddress -
+            Input: an address
+            Action: removes that address from address list
+    **/
     removeAddress (address){
         const newList = this.state.addressList;
         // filter out old address
@@ -315,20 +341,29 @@ export default class App extends React.Component {
         });
     }
 
-    handleSubmit(e) {
-        e.preventDefault();
-        console.log("submitted");
-        var newAddress = e.target.value;
-        let toAdd = { address: newAddress }
-        // add the current state to this new array
-        this.setState({addressList: [...this.state.addressList, toAdd['address']]});
-        console.log(this.state.addressList);
+    /*
+        editAddress -
+            Input: an event handler (lets us see inputted address) and an address
+            Action: changes the address to the new inputted address
+    **/
+    editAddress (e, address){
+        e.preventDefault()
+        const newList = this.state.addressList;
+        var index = newList.indexOf(address);
+
+        if (~index) {
+            newList[index] = e.target.value;
+        }
+
+        this.setState({
+            addressList: newList
+        });
     }
 
-    /**
-     * Calculate & Update state of new dimensions
-     * This helps to deal with narrow windows
-     */
+    /*
+        updateDimensions -
+            Action: recalculates wide to reflect new window width
+    **/
     updateDimensions() {
       if (window.innerWidth > critWidth && !this.state.wide) {
         this.setState({ wide: true});
@@ -338,7 +373,7 @@ export default class App extends React.Component {
     }
 
     /**
-     * Add event listener
+     * Add event listener for window size change
      */
     componentDidMount() {
       this.updateDimensions();
@@ -346,9 +381,6 @@ export default class App extends React.Component {
     }
 
     render() {
-        // console.log(this.state.develop);
-        // console.log(this.state.addressList);
-        // console.log(this.state.locationsRoutes);
         return (
             <div className="App">
                 <html>
@@ -413,8 +445,7 @@ export default class App extends React.Component {
                                         <label for="file">Choose a CSV file</label>
                                     </div>
 
-                                    <p className ="text"> How many canvassers do you have? </p>
-                                    <ChangeCanvassers numPeople={this.state.numPeople} callback={e => {this.changeNumCanvassers(e)}} />
+                                    <ChangeCanvassers numPeople={this.state.numPeople} callback={e => {this.changeNumCanvassers(e)}} prompt="How many canvassers do you have?" />
                                 </div>
                             }
 
@@ -432,12 +463,10 @@ export default class App extends React.Component {
                                                 </th>
                                                 <th className="App-Sides">
                                                     <DisplayEditingAndSharing
-                                                        addressList={this.state.addressList}  
-                                                        removeAddress={this.removeAddress}
+                                                        addressList={this.state.addressList} removeAddress={this.removeAddress} editAddress={this.editAddress}
                                                         addAddress={e => {this.addAddress(e)}}
-                                                        numPeople={this.state.numPeople}  
-                                                        changeNumCanvassers={e => {this.changeNumCanvassers(e)}}
-                                                        updateRoutes={e => {this.updateRoutes(e)}}
+                                                        numPeople={this.state.numPeople} changeNumCanvassers={e => {this.changeNumCanvassers(e)}}
+                                                        updateRoutes={this.updateRoutes}
                                                         urls={this.state.urls}
                                                     />
                                                 </th>
@@ -450,10 +479,10 @@ export default class App extends React.Component {
                                         <div>
                                             <DisplayMap locationsRoutes={this.state.locationsRoutes} />
                                             <DisplayEditingAndSharing
-                                                addressList={this.state.addressList}  removeAddress={this.removeAddress}
+                                                addressList={this.state.addressList}  removeAddress={this.removeAddress} editAddress={this.editAddress}
                                                 addAddress={e => {this.addAddress(e)}}
                                                 numPeople={this.state.numPeople}  changeNumCanvassers={e => {this.changeNumCanvassers(e)}}
-                                                updateRoutes={e => {this.updateRoutes(e)}}
+                                                updateRoutes={this.updateRoutes}
                                                 urls={this.state.urls}
                                             />
                                         </div>
