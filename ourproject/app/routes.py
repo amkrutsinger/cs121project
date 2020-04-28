@@ -21,11 +21,11 @@ route1address = ['340 E Foothill Blvd, Claremont CA', '931 Butte St, Claremont C
 coord1 = [[-117.7103941, 34.1069287], [-117.7326799, 34.1029753], [-117.7258054, 34.1166113], [-117.7163543, 34.1183734], [-117.71376, 34.127773], [-117.7111516, 34.1069425], [-117.7301553, 34.1021421], [-117.724298, 34.116698], [-117.7153621, 34.1183494], [-117.71376, 34.127773], [-117.709978, 34.124954], [-117.709978, 34.124954], [-117.712313, 34.106128], [-117.732929, 34.103057], [-117.733133, 34.116757], [-117.718033, 34.118387], [-117.71376, 34.127773], [-117.706468, 34.107061], [-117.732929, 34.103057], [-117.733133, 34.116757], [-117.718033, 34.118387], [-117.71376, 34.127773], [-117.709978, 34.124954], [-117.709978, 34.124954]]
 route1new = ["340 E Foothill Blvd, Claremont CA", "931 Butte St, Claremont CA", "675 Scripps Dr, Claremont CA", "220 Radcliffe Dr, Claremont CA", "200 Carver Dr, Claremont CA", "300 E Foothill Blvd, Claremont CA", "831 Butte St, Claremont CA", "575 Scripps Dr, Claremont CA", "120 Radcliffe Dr, Claremont CA", "100 Carver Dr, Claremont CA", "1717 N Indian Hill Blvd, Claremont CA", "1217 N Indian Hill Blvd, Claremont CA", "240 E Foothill Blvd, Claremont CA", "731 Butte St, Claremont CA", "475 Scripps Dr, Claremont CA", "20 Radcliffe Dr, Claremont CA", "50 Carver Dr, Claremont CA", "100 E Foothill Blvd, Claremont CA", "631 Butte St, Claremont CA", "275 Scripps Dr, Claremont CA", "5 Radcliffe Dr, Claremont CA", "1 Carver Dr, Claremont CA", "1917 N Indian Hill Blvd, Claremont CA", "717 N Indian Hill Blvd, Claremont CA", "681 Claremont Blvd, Claremont CA"]
 updated = [[[-117.7083, 34.105748], [-117.71012, 34.10382], [-117.714692, 34.094769], [-117.705641, 34.104064], [-117.706716, 34.10235], [-117.7083, 34.105748], [-117.7083, 34.107748]]]
+
 # With 3 Canvassers
 route3 = [[[-117.7083, 34.105748], [-117.71012, 34.10382], [-117.7083, 34.105748]], [[-117.7083, 34.105748], [-117.714692, 34.094769], [-117.7083, 34.105748]], [[-117.7083, 34.105748], [-117.706716, 34.10235], [-117.705641, 34.104064], [-117.7083, 34.105748]]]
 time3 = [371, 569, 350]
 share3 = ['google.com/maps/dir/34.105748,+-117.7083/34.10382,+-117.71012/34.105748,+-117.7083/', 'google.com/maps/dir/34.105748,+-117.7083/34.094769,+-117.714692/34.105748,+-117.7083/', 'google.com/maps/dir/34.105748,+-117.7083/34.10235,+-117.706716/34.104064,+-117.705641/34.105748,+-117.7083/']
-
 
 
 # --- ROUTES --- #
@@ -36,6 +36,7 @@ share3 = ['google.com/maps/dir/34.105748,+-117.7083/34.10382,+-117.71012/34.1057
 @app.route('/index')
 def index():
     return render_template("index.html")
+
 
 # Read addresses from CSV file
 @app.route('/getAddresses', methods = ['POST'])
@@ -50,6 +51,7 @@ def getAddresses():
             return jsonify({"placesList": places})
     return render_template("index.html")
 
+
 # Parse user input, generate distance matrix, and print routes
 @app.route('/findRoutes', methods = ['POST'])
 def findRoutes():
@@ -61,6 +63,7 @@ def findRoutes():
             # Read in csv file and convert to array of places
             return getRoutes(int(request.form['numPeople']))
     return render_template("index.html")
+
 
 # Update numPeople or placesList and generate new routes
 @app.route('/applyChanges', methods = ['POST'])
@@ -75,6 +78,7 @@ def applyChanges():
         GetLocations.placesList = list(data['data'])
         return getRoutes(int(data['canvassers']))
     return render_template("index.html")
+
 
 # Check if an inputted address is valid within ~50 miles
 @app.route('/checkAddress', methods = ['POST'])
@@ -108,6 +112,7 @@ def testingGetRoutes(numPeople):
 def testNewRoute(numPeople):
     if numPeople is 1:
         return jsonify({"actual":[[updated]], "routeTimes": time1, "urls": [share1], "coords": coord1})
+
 
 # --- INTERFACE FUNCTIONS --- #
 
@@ -188,8 +193,9 @@ headers = {
 }
 
 beginningOfUrl = 'https://api.openrouteservice.org/geocode/search?'
-#api_key = '5b3ce3597851110001cf6248aa99e3ffa6984f3390e3f886fc85a33c'
 api_key = '5b3ce3597851110001cf62489a8d14cd2fb64acc883b512ff09bb6fc'
+
+# additional_api_key = '5b3ce3597851110001cf6248aa99e3ffa6984f3390e3f886fc85a33c'
 
 
 # return a matrix of distances given an input of coordinates
@@ -308,9 +314,9 @@ def checkAddress(addr, focusPoint, radius):
         else:
             # return the coordinates of the top search result
             return True
-        
+
         return True
-    
+
 
 # --- SOLUTION TO VEHICLE ROUTING PROBLEM FROM GOOGLE --- #
 
