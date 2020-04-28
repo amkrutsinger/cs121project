@@ -177,13 +177,6 @@ function AddAddress(props) {
     )
 }
 
-// <input
-//     type="text"
-//     id = "newAddress"
-//     class="inputField"
-//     placeholder="Enter address"
-//     onKeyPress={props.callback}>
-// </input>
 
 /** THE MAIN SITE DRIVER **/
 
@@ -254,6 +247,7 @@ export default class App extends React.Component {
             self.setState({
                 addressList: address.placesList,
                 locationsRoutes: routes.actual,
+                coords: routes.coords,
                 urls: routes.urls,
                 page: "step2"
             })
@@ -294,6 +288,7 @@ export default class App extends React.Component {
                 self.setState({
                     locationsRoutes: routes.actual,
                     urls: routes.urls,
+                    coords: routes.coords,
                     page: "step2"
                 })
             }))
@@ -326,14 +321,30 @@ export default class App extends React.Component {
     **/
     addAddress(e) {
         e.preventDefault()
-        this.setState({addressList: [...this.state.addressList, e.target.value]})
+        var address = e.target.value
 
+        const data = {addressList: this.state.addressList, addr: address, coordinates: this.state.coords}
+        var self = this
+        axios
+            .post("/checkAddress", data)
+            .then(function (response) {
+                // update state with results from backend (flask/python)
+                let valid = response.data.valid
+                let newAddress = response.data.addr
+                let address = response.data.addressList
 
-        // let newAddress = e.target.value
-        //
-        // if (e.key === 'Enter') {
-        //     this.setState({addressList: [...this.state.addressList, newAddress]})
-        // }
+                // check if address is valid
+                if (valid === 'valid') {
+                    self.setState({
+                        addressList: [...address, newAddress]
+                    })
+                }
+                else {
+                    console.log('invalid address')
+                }
+                console.log(self.state.addressList)
+            })
+            .catch(err => console.warn(err))
     }
 
     /*
